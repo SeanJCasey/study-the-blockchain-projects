@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Bike Registry</title>
+</head>
+
+<body>
+    <div class="container">
+
+        <h1>My Bike Registry</h1>
+
+        <hr>
+
+        <div id="errors" style="color: red;"></div>
+        <div id="successes" style="color: green;"></div>
+
+        <h2>Lookup a bike</h2>
+        <form id="lookupBikeForm">
+            <input type="number" placeholder="Bike ID" id="lookupBikeIdInput" />
+
+            <button id="lookupBikeButton" onclick="lookupBikeButtonClicked()">Lookup Bike</button>
+        </form>
+
+        <div id="lookupBikeResult" style="display: none;">
+            <h3>Bike Info</h3>
+            <div>
+                <label>Owner:</label>
+                <label id="lookupBikeOwnerResult"></label>
+            </div>
+            <div>
+                <label>Color:</label>
+                <label id="lookupBikeColorResult"></label>
+            </div>
+            <div>
+                <label>Year:</label>
+                <label id="lookupBikeYearResult"></label>
+            </div>
+        </div>
+
+        <h2>Transfer a bike</h2>
+        <form id="transferBikeForm">
+            <input type="number" placeholder="Bike ID" id="transferBikeIdInput" />
+            <input type="text" placeholder="0x0" id="transferBikeToAddressInput" />
+
+            <button id="transferBikeButton" onclick="transferBikeButtonClicked()">Transfer Bike</button>
+        </form>
+
+        <h2>Register a bike (official use only)</h2>
+        <form id="createBikeForm">
+            <input type="number" placeholder="Bike ID" id="createBikeIdInput" />
+            <input type="text" placeholder="Bike Color" id="createBikeColorInput" />
+            <input type="number" placeholder="Bike Year" id="createBikeYearInput" />
+
+            <button id="createBikeButton" onclick="createBikeButtonClicked()">Register Bike</button>
+        </form>
+
+    </div>
+
+    <script src="web3.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="abi-contract-addr.js"></script>
+    <script src="app.js"></script>
+
+</body>
+
+</html>
