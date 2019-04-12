@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Bike Registry</title>
+</head>
+
+<body>
+    <div class="container">
+
+        <h1>Medical Records</h1>
+
+        <hr>
+
+        <div id="errors" style="color: red;"></div>
+        <div id="successes" style="color: green;"></div>
+
+        <h2>Lookup a record</h2>
+        <form id="lookupRecordForm">
+            <input type="string" placeholder="Ethereum address" id="lookupRecordAddressInput" />
+
+            <button id="lookupRecordButton" onclick="lookupRecordButtonClicked()">Lookup Record</button>
+        </form>
+
+        <div id="lookupRecordResult" style="display: none;">
+            <h3>Record Info</h3>
+            <div>
+                <label>Problems:</label>
+                <label id="lookupRecordProblemsResult"></label>
+            </div>
+            <div>
+                <label>Medications:</label>
+                <label id="lookupRecordMedicationsResult"></label>
+            </div>
+            <div>
+                <label>Allergies:</label>
+                <label id="lookupRecordAllergiesResult"></label>
+            </div>
+            <div>
+                <label>Weight (pounds):</label>
+                <label id="lookupRecordWeightResult"></label>
+            </div>
+            <div>
+                <label>Height (inches):</label>
+                <label id="lookupRecordHeightResult"></label>
+            </div>
+        </div>
+
+        <div id="createRecord">
+            <h2>Create your record</h2>
+            <form id="createRecordForm">
+                <p>This record will be associated with your Ethereum address. If you already have a record, use the "Update your record" form instead.</p>
+                <input type="text" placeholder="Problems" id="createRecordProblemsInput" />
+                <input type="text" placeholder="Medications" id="createRecordMedicationsInput" />
+                <input type="text" placeholder="Allergies" id="createRecordAllergiesInput" />
+                <input type="number" placeholder="Weight (in pounds)" id="createRecordWeightInput" />
+                <input type="number" placeholder="Height (in inches)" id="createRecordHeightInput" />
+
+                <button id="createRecordButton" onclick="createRecordButtonClicked()">Create Record</button>
+            </form>
+        </div>
+
+        <div id="updateRecord" style="display: none;">
+            <h2>Update your record</h2>
+            <form id="updateRecordProblemsForm">
+                <input type="text" placeholder="Problems" id="updateRecordProblemsInput" />
+                <button id="updateRecordProblemsButton" onclick="updateRecordProblemsButtonClicked()">Update Problems</button>
+            </form>
+            <form id="updateRecordMedicationsForm">
+                <input type="text" placeholder="Medications" id="updateRecordMedicationsInput" />
+                <button id="updateRecordMedicationsButton" onclick="updateRecordMedicationsButtonClicked()">Update Medications</button>
+            </form>
+            <form id="updateRecordAllergiesForm">
+                <input type="text" placeholder="Allergies" id="updateRecordAllergiesInput" />
+                <button id="updateRecordAllergiesButton" onclick="updateRecordAllergiesButtonClicked()">Update Allergies</button>
+            </form>
+            <form id="updateRecordWeightForm">
+                <input type="text" placeholder="Weight" id="updateRecordWeightInput" />
+                <button id="updateRecordWeightButton" onclick="updateRecordWeightButtonClicked()">Update Weight</button>
+            </form>
+            <form id="updateRecordHeightForm">
+                <input type="text" placeholder="Height" id="updateRecordHeightInput" />
+                <button id="updateRecordHeightButton" onclick="updateRecordHeightButtonClicked()">Update Height</button>
+            </form>
+        </div>
+
+    </div>
+
+    <script src="web3.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="abi-contract-addr.js"></script>
+    <script src="app.js"></script>
+
+</body>
+
+</html>
