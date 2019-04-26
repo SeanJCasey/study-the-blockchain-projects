@@ -20,9 +20,9 @@ module.exports = (deployer, network) => {
         deployer.deploy(UniswapFactory)
             .then(() => deployer.deploy(CostAverageOrderBook, UniswapFactory.address)
                 .then(() => deployer.deploy(SeanToken)
-                    .then(() => UniswapFactory.deployed()
-                        .then((factory) => factory.createExchange(SeanToken.address))
-                    )
+                    // .then(() => UniswapFactory.deployed()
+                    //     .then((factory) => factory.createExchange(SeanToken.address))
+                    // )
                 )
             )
     }
