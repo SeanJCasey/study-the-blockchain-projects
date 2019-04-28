@@ -1,5 +1,6 @@
 const UniswapFactory = artifacts.require("./uniswap_factory");
-const UniswapFactoryInterface = artifacts.require("./UniswapFactoryInterface");
+const UniswapExchange = artifacts.require("./uniswap_exchange");
+const UniswapExchangeInterface = artifacts.require("./UniswapExchangeInterface");
 const SeanToken = artifacts.require("./SeanToken");
 
 module.exports = (deployer, network, accounts) => {
@@ -11,20 +12,29 @@ module.exports = (deployer, network, accounts) => {
     if (!(network in uniswapFactoryAddresses)) {
         let token;
         let factory;
+        let exchangeTemplate;
 
         deployer
+            .then(() => UniswapExchange.deployed())
+            .then((instance) => {
+                exchangeTemplate = instance;
+            })
+            .then(() => UniswapFactory.deployed())
+            .then((instance) => {
+                factory = instance;
+                factory.initializeFactory(exchangeTemplate.address)
+            })
             .then(() => SeanToken.deployed())
             .then((instance) => token = instance)
-            .then(() => UniswapFactory.deployed())
-            .then((instance) => factory = instance)
-            .then(() => factory.createExchange(token.address, {from: accounts[1]})
-        );
-
-        // // Next steps:
-        // // 1. Add liquidity with ETH and SeanToken
-        // const min_liquidity = 0;
-        // const max_tokens = 10000;
-        // const deadline = now + 300 // in JS
-        // exchange.addLiquidity(min_liquidity, max_tokens, deadline, {value: 5000000000000000000})
+            .then(() => factory.createExchange(token.address))
+            // Add liquidity with ETH and SeanToken
+            .then(() => factory.getExchange(token.address))
+            .then((exchangeAddress) => UniswapExchangeInterface.at(exchangeAddress))
+            .then((exchange) => {
+                const min_liquidity = 0;
+                const max_tokens = 10000;
+                const deadline = Math.floor(Date.now() / 1000) + 300;
+                exchange.addLiquidity(min_liquidity, max_tokens, deadline, {value: 5000000000000000000});
+            })
     }
 };

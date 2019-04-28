@@ -1268,12 +1268,12 @@
         }
       },
       "links": {},
-      "address": "0x447c6a83365B8A4cCBEaDe7f0502061EcBe9754D",
-      "transactionHash": "0x02f44cd6ba9d707822781719869c8cc1c1f346122373f95479431d24a5570154"
+      "address": "0xE0084dB0F26363fFE428CaB10F5C58015710e7Ff",
+      "transactionHash": "0xfa6fc2be1da28a5d1055172158891553067ae72a7c2fc042833de414d13f05a2"
     }
   },
   "schemaVersion": "3.0.6",
-  "updatedAt": "2019-04-26T19:25:05.836Z",
+  "updatedAt": "2019-04-27T01:52:35.196Z",
   "devdoc": {
     "methods": {
       "allowance(address,address)": {

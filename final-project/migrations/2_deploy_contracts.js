@@ -14,17 +14,13 @@ module.exports = (deployer, network) => {
 
     if (!(network in uniswapFactoryAddresses)) {
         const SeanToken = artifacts.require("./SeanToken");
-        // const SeanTokenUniswapExchange = artifacts.require("./uniswap_exchange");
+        const UniswapExchange = artifacts.require("./uniswap_exchange");
         const UniswapFactory = artifacts.require("./uniswap_factory");
 
+        deployer.deploy(SeanToken);
+        deployer.deploy(UniswapExchange);
         deployer.deploy(UniswapFactory)
-            .then(() => deployer.deploy(CostAverageOrderBook, UniswapFactory.address)
-                .then(() => deployer.deploy(SeanToken)
-                    // .then(() => UniswapFactory.deployed()
-                    //     .then((factory) => factory.createExchange(SeanToken.address))
-                    // )
-                )
-            )
+            .then(() => deployer.deploy(CostAverageOrderBook, UniswapFactory.address));
     }
 
     else {

@@ -154,12 +154,31 @@
   },
   "networks": {
     "5777": {
-      "events": {},
+      "events": {
+        "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9": {
+          "name": "NewExchange",
+          "inputs": [
+            {
+              "type": "address",
+              "name": "token",
+              "indexed": true
+            },
+            {
+              "type": "address",
+              "name": "exchange",
+              "indexed": true
+            }
+          ],
+          "anonymous": false,
+          "type": "event",
+          "signature": "0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9"
+        }
+      },
       "links": {},
-      "address": "0xcbef2cc677620Abc2cb82FDe27C35B7A2f9cbB8c",
-      "transactionHash": "0xba371d792fe512475f8a0da4e41d78a589012ac99430e2ec2c1f120dc18d4aef"
+      "address": "0x2f1ec0e92aD6ae120f7f31b81Aa87E785B6FAB53",
+      "transactionHash": "0x4a36ef4a88baebd084005db44c82fe127fda7dfc4e18b22459f47769062de1fc"
     }
   },
   "schemaVersion": "3.0.6",
-  "updatedAt": "2019-04-26T19:25:05.830Z"
+  "updatedAt": "2019-04-27T01:52:35.193Z"
 }
