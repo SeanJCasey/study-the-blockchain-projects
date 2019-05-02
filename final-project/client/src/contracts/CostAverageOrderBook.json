@@ -50,7 +50,8 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "signature": "0x5c70e154"
     },
     {
       "constant": true,
@@ -64,7 +65,8 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "signature": "0xaf640d0f"
     },
     {
       "inputs": [
@@ -75,7 +77,8 @@
       ],
       "payable": true,
       "stateMutability": "payable",
-      "type": "constructor"
+      "type": "constructor",
+      "signature": "constructor"
     },
     {
       "constant": false,
@@ -106,7 +109,8 @@
       ],
       "payable": true,
       "stateMutability": "payable",
-      "type": "function"
+      "type": "function",
+      "signature": "0x92365c7e"
     },
     {
       "constant": true,
@@ -149,7 +153,8 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "signature": "0x2c62a7ef"
     },
     {
       "constant": true,
@@ -168,7 +173,8 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "signature": "0x838bac1e"
     },
     {
       "constant": false,
@@ -177,7 +183,8 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function"
+      "type": "function",
+      "signature": "0x2e84767e"
     }
   ],
   "metadata": "{\"compiler\":{\"version\":\"0.5.2+commit.1df8f40c\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[{\"name\":\"_id\",\"type\":\"uint256\"}],\"name\":\"getCostAverageOrder\",\"outputs\":[{\"name\":\"amount_\",\"type\":\"uint256\"},{\"name\":\"targetCurrency_\",\"type\":\"address\"},{\"name\":\"frequency_\",\"type\":\"uint256\"},{\"name\":\"batches_\",\"type\":\"uint8\"},{\"name\":\"batchesExecuted_\",\"type\":\"uint8\"},{\"name\":\"lastConversionTimestamp_\",\"type\":\"uint256\"},{\"name\":\"targetCurrencyConverted_\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"executeDueConversions\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"idToCostAverageOrder\",\"outputs\":[{\"name\":\"owner\",\"type\":\"address\"},{\"name\":\"targetCurrency\",\"type\":\"address\"},{\"name\":\"amount\",\"type\":\"uint256\"},{\"name\":\"frequency\",\"type\":\"uint256\"},{\"name\":\"lastConversionTimestamp\",\"type\":\"uint256\"},{\"name\":\"sourceCurrencyBalance\",\"type\":\"uint256\"},{\"name\":\"targetCurrencyConverted\",\"type\":\"uint256\"},{\"name\":\"batches\",\"type\":\"uint8\"},{\"name\":\"batchesExecuted\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_id\",\"type\":\"uint256\"}],\"name\":\"checkConversionDue\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_amount\",\"type\":\"uint256\"},{\"name\":\"_targetCurrency\",\"type\":\"address\"},{\"name\":\"_frequency\",\"type\":\"uint256\"},{\"name\":\"_batches\",\"type\":\"uint8\"}],\"name\":\"createCostAverageOrder\",\"outputs\":[{\"name\":\"id_\",\"type\":\"uint256\"}],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"id\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_uniswapFactoryAddress\",\"type\":\"address\"}],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"constructor\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/seancasey/Sites/studytheblockchain/projects/final-project/contracts/CostAverageOrderBook.sol\":\"CostAverageOrderBook\"},\"evmVersion\":\"byzantium\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/seancasey/Sites/studytheblockchain/projects/final-project/contracts/CostAverageOrderBook.sol\":{\"keccak256\":\"0xb321c5498f0554ea1f8f6ba1e89b5da7cb971fb347d9e969e97013d8c7ca7131\",\"urls\":[\"bzzr://5468aea0d0afed5b0a770d95c78330fe232f576bb97a8e8e9f0147cc5dfe2363\"]},\"/Users/seancasey/Sites/studytheblockchain/projects/final-project/contracts/UniswapExchangeInterface.sol\":{\"keccak256\":\"0xeedcf106ccc114c73467a64adcdd0827d6d00d1a530693e392164e15a5b8b7c0\",\"urls\":[\"bzzr://847e5e7114bd822f9aa975b43a071b750673af364daa7b3c363c31fd8d1c4fc5\"]},\"/Users/seancasey/Sites/studytheblockchain/projects/final-project/contracts/UniswapFactoryInterface.sol\":{\"keccak256\":\"0xf16c0263dbcb1c38429f4fb6a17ad17446b53f5fd517f94c1db10cc562683df8\",\"urls\":[\"bzzr://2e537b67a842c801ee14be46a5cf23d1ca6c9275edcdeb74ca6acf4cb29011f8\"]}},\"version\":1}",
@@ -8459,9 +8466,16 @@
     "name": "solc",
     "version": "0.5.2+commit.1df8f40c.Emscripten.clang"
   },
-  "networks": {},
+  "networks": {
+    "5777": {
+      "events": {},
+      "links": {},
+      "address": "0xa6756630558b3D87e4CB5Fc6c3ba615A8c6c8146",
+      "transactionHash": "0xb34faa158e378d08a2bd6a94499506072f39cbe0e534a7b3c4787902927666a3"
+    }
+  },
   "schemaVersion": "3.0.6",
-  "updatedAt": "2019-04-28T00:50:53.334Z",
+  "updatedAt": "2019-05-02T12:24:59.578Z",
   "devdoc": {
     "methods": {}
   },

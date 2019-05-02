@@ -1,26 +1,47 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from 'react';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import CostAverageOrderBuilder from './CostAverageOrderBuilder';
+
+class App extends Component {
+  // TODO: move 'token' to another component
+  state = {
+    loading: true,
+    drizzleState: null,
+    tokenAddress: '0xDc91e91b28B8200EA836E27f8a8416E665E22d17'
+  };
+
+  componentDidMount() {
+    const { drizzle } = this.props;
+
+    // subscribe to changes in the store
+    this.unsubscribe = drizzle.store.subscribe(() => {
+
+      // every time the store updates, grab the state from drizzle
+      const drizzleState = drizzle.store.getState();
+
+      // check to see if it's ready, if so, update local component state
+      if (drizzleState.drizzleStatus.initialized) {
+        this.setState({ loading: false, drizzleState });
+      }
+    });
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
+
+  render() {
+    if (this.state.loading) return "Loading Drizzle...";
+    return (
+      <div className="App">
+        <h1>Vulcan Trade</h1>
+        <CostAverageOrderBuilder
+          drizzle={this.props.drizzle}
+          drizzleState={this.state.drizzleState}
+        />
+      </div>
+    );
+  }
 }
 
 export default App;
