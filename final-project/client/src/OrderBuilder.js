@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+// import PropTypes from 'prop-types';
 
 class CostAverageOrderBuilder extends Component {
   constructor(props) {
@@ -6,8 +7,8 @@ class CostAverageOrderBuilder extends Component {
 
     this.state = {
       'newOrderInputs': {
+        'tokenAddress': '0xDc91e91b28B8200EA836E27f8a8416E665E22d17',
         'quantity': '',
-        'tokenAddress': '',
         'frequency': '',
         'batches': ''
       },
@@ -18,54 +19,22 @@ class CostAverageOrderBuilder extends Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  componentDidMount() {
-    // const { drizzle, drizzleState } = this.props;
-
-    // use web3 to get factory and exchange info?
-    // drizzle.contracts contains the deployed contract info, e.g., address
-    // const FactoryContract = drizzle.contracts.UniswapFactoryInterface;
-
-    // let drizzle know we want to watch this var method
-    // const exchangeKey = FactoryContract.methods['getExchange'].cacheCall(tokenAddress);
-  }
-
-  createCostAverageOrder() {
+  createOrder() {
     const { drizzle, drizzleState } = this.props;
-    const orderContract = drizzle.contracts.CostAverageOrderBook;
+    const contract = drizzle.contracts.CostAverageOrderBook;
 
-    console.log(drizzle);
     const amount = drizzle.web3.utils.toWei(String(this.state.newOrderInputs.quantity), 'ether');
-    console.log(amount);
-    // let drizzle know we want to call the `set` method with `value`
-    const newOrderStackId = orderContract.methods['createCostAverageOrder'].cacheSend(
+
+    const newOrderStackId = contract.methods["createOrder"].cacheSend(
       amount,
       this.state.newOrderInputs.tokenAddress,
       Number(this.state.newOrderInputs.frequency),
       Number(this.state.newOrderInputs.batches),
-      {
-        from: drizzleState.accounts[0],
-        value: amount
-      }
+      { from: drizzleState.accounts[0], value: amount }
     );
 
-    // save the `stackId` for later reference
     this.setState({ newOrderStackId });
   }
-
-  // from Drizzle docs
-  getTxStatus() {
-    // get the transaction states from the drizzle state
-    const { transactions, transactionStack } = this.props.drizzleState;
-
-    // get the transaction hash using our saved `stackId`
-    const txHash = transactionStack[this.state.newOrderStackId];
-
-    // if transaction hash does not exist, don't display anything
-    if (!txHash) return null;
-
-    // otherwise, return the transaction status
-    return `Transaction status: ${transactions[txHash] && transactions[txHash].status}`;
-  };
 
   handleInputChange(event) {
     this.setState({
@@ -81,7 +50,7 @@ class CostAverageOrderBuilder extends Component {
 
     console.log(this.state.newOrderInputs);
 
-    this.createCostAverageOrder()
+    this.createOrder()
   }
 
   render() {
@@ -93,7 +62,7 @@ class CostAverageOrderBuilder extends Component {
           <div className="form-group">
             <input
               name="quantity"
-              type="number"
+              type="text"
               placeholder="No of ETH"
               className="form-control"
               id="createCostAverageOrderQuantityInput"
@@ -133,10 +102,13 @@ class CostAverageOrderBuilder extends Component {
 
           <button type="submit" className="btn btn-primary" id="createCostAverageOrderButton">Vulcanize!</button>
         </form>
-        <div>{this.getTxStatus()}</div>
       </div>
     );
   }
 }
+
+// CostAverageOrderBuilder.contextTypes = {
+//   drizzle: PropTypes.object
+// }
 
 export default CostAverageOrderBuilder;
