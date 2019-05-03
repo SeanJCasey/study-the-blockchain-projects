@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+
+import { TOKENTABLE, TIMETABLE } from './constants';
 
 class OrderTable extends Component {
   constructor(props, context) {
@@ -39,19 +40,18 @@ class OrderTable extends Component {
   }
 
   render() {
-    const { drizzleState } = this.props;
+    const { drizzle, drizzleState } = this.props;
     const { orderKeys } = this.state;
 
     let orders = [];
     for (const orderKey of orderKeys) {
       const order = drizzleState.contracts.CostAverageOrderBook.getOrderForOwnerIndex[orderKey];
-
       if (order) {
         orders.push(
           {
             'id': order.value.id_,
-            'amount': order.value.amount_,
-            'tokenAddress': order.value.targetCurrency_,
+            'amount': drizzle.web3.utils.fromWei(order.value.amount_, 'ether'),
+            'targetCurrency': order.value.targetCurrency_,
             'frequency': order.value.frequency_,
             'batches': order.value.batches_
           }
@@ -79,8 +79,8 @@ class OrderTable extends Component {
                 <tr key={order.id}>
                   <td>{order.id}</td>
                   <td>{order.amount}</td>
-                  <td>{order.tokenAddress}</td>
-                  <td>{order.frequency}</td>
+                  <td>{TOKENTABLE[order.targetCurrency] ? TOKENTABLE[order.targetCurrency].name : order.targetCurrency}</td>
+                  <td>{TIMETABLE[order.frequency] ? TIMETABLE[order.frequency] : `${order.frequency} seconds `}</td>
                   <td>{order.batches}</td>
                 </tr>
               );

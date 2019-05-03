@@ -10,8 +10,8 @@ class App extends Component {
       <div className="App">
         <div className="container">
           <h1>Vulcanizer</h1>
-          <OrderTableContainer />
           <OrderBuilderContainer />
+          <OrderTableContainer />
         </div>
       </div>
     );

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-// import PropTypes from 'prop-types';
+import { TOKENTABLE, TIMETABLE } from './constants';
 
 class CostAverageOrderBuilder extends Component {
   constructor(props) {
@@ -7,7 +7,7 @@ class CostAverageOrderBuilder extends Component {
 
     this.state = {
       'newOrderInputs': {
-        'tokenAddress': '0xDc91e91b28B8200EA836E27f8a8416E665E22d17',
+        'tokenAddress': '',
         'quantity': '',
         'frequency': '',
         'batches': ''
@@ -60,6 +60,7 @@ class CostAverageOrderBuilder extends Component {
         <h2>Create an Order</h2>
         <form id="createCostAverageOrderForm" onSubmit={this.handleSubmit}>
           <div className="form-group">
+            <label htmlFor="createCostAverageOrderQuantityInput">Amount to Convert</label>
             <input
               name="quantity"
               type="text"
@@ -67,29 +68,43 @@ class CostAverageOrderBuilder extends Component {
               className="form-control"
               id="createCostAverageOrderQuantityInput"
               onChange={this.handleInputChange}
+              required
             />
           </div>
           <div className="form-group">
-            <input
+            <label htmlFor="createCostAverageOrderTokenAddressInput">Target Currency</label>
+            <select
               name="tokenAddress"
-              type="text"
-              placeholder="target ERC20 token"
               className="form-control"
               id="createCostAverageOrderTokenAddressInput"
               onChange={this.handleInputChange}
-            />
+              defaultValue=""
+              required
+            >
+              <option value="" disabled>Choose a currency...</option>
+              {Object.keys(TOKENTABLE).map(address =>
+                <option value={address} key={address}>{TOKENTABLE[address].name}</option>
+              )}
+            </select>
           </div>
           <div className="form-group">
-            <input
+            <label htmlFor="createCostAverageOrderFrequencyInput">Conversion Frequency</label>
+            <select
               name="frequency"
-              type="number"
-              placeholder="time interval"
               className="form-control"
               id="createCostAverageOrderFrequencyInput"
               onChange={this.handleInputChange}
-            />
+              defaultValue=""
+              required
+            >
+              <option value="" disabled>Choose frequency...</option>
+              {Object.keys(TIMETABLE).map(seconds =>
+                <option value={seconds} key={seconds}>{TIMETABLE[seconds]}</option>
+              )}
+            </select>
           </div>
           <div className="form-group">
+            <label htmlFor="createCostAverageOrderTranchesInput">Batches</label>
             <input
               name="batches"
               type="number"
@@ -97,6 +112,7 @@ class CostAverageOrderBuilder extends Component {
               className="form-control"
               id="createCostAverageOrderTranchesInput"
               onChange={this.handleInputChange}
+              required
             />
           </div>
 
