@@ -12,7 +12,7 @@ contract CostAverageOrderBook {
     // address internal uniswapFactoryAddress;
     UniswapFactoryInterface internal factory;
 
-    struct CostAverageOrderInfo {
+    struct OrderInfo {
         address owner;
         address targetCurrency;
         // address contribCurrency; // either ETH or DAI // consider enum
@@ -24,19 +24,19 @@ contract CostAverageOrderBook {
         uint8 batches; // number of batches, up to 255
         uint8 batchesExecuted;
         // bool isActive; // wait until need this
-
     }
-    mapping(uint256 => CostAverageOrderInfo) public idToCostAverageOrder; // internal or public?
+    mapping(uint256 => OrderInfo) public idToCostAverageOrder; // internal or public?
+    mapping(address => uint256[]) public ownerToOrderIds;
 
     constructor (address _uniswapFactoryAddress) public payable { // I think we need payable to instantiate the contract with ETH
         // uniswapFactoryAddress = _uniswapFactoryAddress;
         factory = UniswapFactoryInterface(_uniswapFactoryAddress);
     }
 
-    function createCostAverageOrder (uint256 _amount, address _targetCurrency, uint256 _frequency, uint8 _batches) public payable returns (uint256 id_) {
+    function createOrder (uint256 _amount, address _targetCurrency, uint256 _frequency, uint8 _batches) public payable returns (uint256 id_) {
         require(_amount == msg.value); // Can't use this if they send DAI
 
-        CostAverageOrderInfo memory newOrder = CostAverageOrderInfo({
+        OrderInfo memory newOrder = OrderInfo({
             amount: _amount,
             targetCurrency: _targetCurrency,
             frequency: _frequency,
@@ -49,24 +49,36 @@ contract CostAverageOrderBook {
         });
 
         idToCostAverageOrder[id] = newOrder;
+        ownerToOrderIds[msg.sender].push(id);
 
         id++;
 
         return id-1;
     }
 
-    function getCostAverageOrder (uint256 _id) view public returns (
-        uint256 amount_, address targetCurrency_, uint256 frequency_, uint8 batches_,
+    function getOrder (uint256 _id) view public returns (
+        uint256 id_, uint256 amount_, address targetCurrency_, uint256 frequency_, uint8 batches_,
         uint8 batchesExecuted_, uint256 lastConversionTimestamp_, uint256 targetCurrencyConverted_) {
-        CostAverageOrderInfo memory order = idToCostAverageOrder[_id];
+        OrderInfo memory order = idToCostAverageOrder[_id];
 
-        return (order.amount, order.targetCurrency, order.frequency, order.batches,
+        return (_id, order.amount, order.targetCurrency, order.frequency, order.batches,
             order.batchesExecuted, order.lastConversionTimestamp, order.targetCurrencyConverted);
+    }
+
+    function getOrderForOwnerIndex (address _owner, uint256 _index) view public returns (
+        uint256 id_, uint256 amount_, address targetCurrency_, uint256 frequency_, uint8 batches_,
+        uint8 batchesExecuted_, uint256 lastConversionTimestamp_, uint256 targetCurrencyConverted_) {
+        return getOrder(ownerToOrderIds[_owner][_index]);
+    }
+
+    function getOrderCountForOwner (address _owner) view public returns (
+        uint256 count_) {
+        count_ = ownerToOrderIds[_owner].length;
     }
 
     // Q: should this be done by the server since it does not cost gas? Prob not b/c need to know within the current block...
     function checkConversionDue (uint256 _id) view public returns (bool) {
-        CostAverageOrderInfo memory order = idToCostAverageOrder[_id];
+        OrderInfo memory order = idToCostAverageOrder[_id];
 
         // Check if there should be batches remaining
         if (order.batchesExecuted >= order.batches) return false;
@@ -98,7 +110,7 @@ contract CostAverageOrderBook {
     }
 
     function convertCurrency(uint256 _id) private {
-        CostAverageOrderInfo storage order = idToCostAverageOrder[_id];
+        OrderInfo storage order = idToCostAverageOrder[_id];
 
         uint256 batchValue = valuePerBatch(order.amount, order.batches);
 
