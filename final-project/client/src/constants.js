@@ -3,11 +3,11 @@ export const TOKENTABLE = {
         name: 'Sean Token',
         symbol: 'SJC'
     },
-    '0x728B86683950F559E3F64c4F57ff0776906Fd0Ff': {
-        name: 'Pavan Token',
-        symbol: 'PVN'
+    '0x07bF0ED1a0cFffEA8a2A4b8DEA611B79DBdEB0A1': {
+        name: 'Moon Unit',
+        symbol: 'MNU'
     },
-    '0x19342108sdaf9019E3F64c4F57ff0776906Fd0Ff': {
+    '0x52B001c38739487C1bBEdEE7133E5f302453E64b': {
         name: 'Consensys Token',
         symbol: 'LUB'
     },
