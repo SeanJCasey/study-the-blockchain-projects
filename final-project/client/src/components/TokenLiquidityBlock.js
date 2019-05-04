@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
-import { TOKENTABLE } from './constants';
-import UniswapExchangeInterface from "./contracts/UniswapExchangeInterface.json";
+import { TOKENTABLE } from '../constants';
+import UniswapExchangeInterface from "../contracts/UniswapExchangeInterface.json";
 
 class TokenLiquidityBlock extends Component {
 

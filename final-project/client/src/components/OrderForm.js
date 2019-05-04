@@ -1,5 +1,5 @@
 import React from 'react';
-import { TOKENTABLE, TIMETABLE } from './constants';
+import { TOKENTABLE, TIMETABLE } from '../constants';
 
 const OrderForm = ({ onInputChange, onSubmit }) =>
   <form id="createCostAverageOrderForm" onSubmit={onSubmit}>

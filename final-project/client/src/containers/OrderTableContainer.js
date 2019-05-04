@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { DrizzleContext } from "drizzle-react";
 
-import OrderTable from "./OrderTable";
+import OrderTable from "../components/OrderTable";
 
 class OrderTableContainer extends Component {
 

@@ -4,7 +4,7 @@ import { DrizzleContext } from "drizzle-react";
 import OrderBuilderContainer from './OrderBuilderContainer';
 import OrderTableContainer from './OrderTableContainer';
 
-class CostAverageOrderApp extends Component {
+class App extends Component {
 
   render() {
     return (
@@ -31,4 +31,4 @@ class CostAverageOrderApp extends Component {
   }
 }
 
-export default CostAverageOrderApp;
+export default App;

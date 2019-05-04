@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
-import OrderForm from "./OrderForm";
-import TokenLiquidityBlock from "./TokenLiquidityBlock";
+import OrderForm from "../components/OrderForm";
+import TokenLiquidityBlock from "../components/TokenLiquidityBlock";
 
 
 class OrderBuilderContainer extends Component {

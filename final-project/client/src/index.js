@@ -5,7 +5,7 @@ import { Drizzle, generateStore } from "drizzle";
 import { DrizzleContext } from "drizzle-react";
 import drizzleOptions from "./drizzleOptions";
 
-import App from './App';
+import App from './containers/App';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.scss';

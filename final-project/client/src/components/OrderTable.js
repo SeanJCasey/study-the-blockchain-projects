@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { TOKENTABLE, TIMETABLE } from './constants';
+import { TOKENTABLE, TIMETABLE } from '../constants';
 
 class OrderTable extends Component {
   constructor(props) {
