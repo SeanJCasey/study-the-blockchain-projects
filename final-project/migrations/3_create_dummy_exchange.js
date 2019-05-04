@@ -29,12 +29,21 @@ module.exports = (deployer, network, accounts) => {
             .then(() => factory.createExchange(token.address))
             // Add liquidity with ETH and SeanToken
             .then(() => factory.getExchange(token.address))
-            .then((exchangeAddress) => UniswapExchangeInterface.at(exchangeAddress))
-            .then((exchange) => {
+            .then(exchangeAddress => {
+                token.approve(exchangeAddress, 10000);
+                return exchangeAddress;
+            })
+            .then(exchangeAddress => UniswapExchangeInterface.at(exchangeAddress))
+            .then(exchange => {
                 const min_liquidity = 0;
                 const max_tokens = 10000;
                 const deadline = Math.floor(Date.now() / 1000) + 300;
-                exchange.addLiquidity(min_liquidity, max_tokens, deadline, {value: 5000000000000000000});
+
+                console.log("deadline", deadline);
+                // console.log(Date.now());
+                exchange.addLiquidity(min_liquidity, max_tokens, deadline, {value: 5000000000000000000})
+                    // .then(result => console.log(result))
+                    .catch(err => console.log(err));
             })
     }
 };

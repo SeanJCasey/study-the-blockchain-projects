@@ -1,21 +1,7 @@
-import React, { Component } from 'react';
+import React from "react";
 
-import OrderBuilderContainer from './OrderBuilderContainer';
-import OrderTableContainer from './OrderTableContainer';
+import CostAverageOrderApp from "./CostAverageOrderApp";
 
-class App extends Component {
-
-  render() {
-    return (
-      <div className="App">
-        <div className="container">
-          <h1>Vulcanizer</h1>
-          <OrderBuilderContainer />
-          <OrderTableContainer />
-        </div>
-      </div>
-    );
-  }
-}
-
-export default App;
+export default () => (
+  <CostAverageOrderApp/ >
+)

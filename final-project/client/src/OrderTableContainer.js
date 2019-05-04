@@ -1,37 +1,30 @@
-import React from "react";
+import React, { Component } from 'react';
 import { DrizzleContext } from "drizzle-react";
 
 import OrderTable from "./OrderTable";
 
-export default () => (
-  <DrizzleContext.Consumer>
-    {drizzleContext => {
-      const { drizzle, drizzleState, initialized } = drizzleContext;
+class OrderTableContainer extends Component {
 
-      if (!initialized) {
-        return "Loading...";
-      }
+  render() {
+    return (
+      <DrizzleContext.Consumer>
+        {drizzleContext => {
+          const { drizzle, drizzleState, initialized } = drizzleContext;
 
-      return (
-        <OrderTable drizzle={drizzle} drizzleState={drizzleState} />
-      );
-    }}
-  </DrizzleContext.Consumer>
-)
+          if (!initialized) {
+            return "Loading...";
+          }
 
-// import OrderTable from "./OrderTable";
-// import { drizzleConnect } from "drizzle-react";
+          return (
+            <div className="orderTableContainer">
+              <OrderTable drizzle={drizzle} drizzleState={drizzleState} />
+            </div>
+          );
+        }}
+      </DrizzleContext.Consumer>
 
-// const mapStateToProps = state => {
-//     console.log(state);
-//   return {
-//     accounts: state.accounts,
-//     CostAverageOrderBook: state.contracts.CostAverageOrderBook,
-//     drizzleStatus: state.drizzleStatus,
-//     // drizzleState: state.store.getState()
-//   };
-// };
+    );
+  }
+}
 
-// const OrderTableContainer = drizzleConnect(OrderTable, mapStateToProps);
-
-// export default OrderTableContainer;
+export default OrderTableContainer;
