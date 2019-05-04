@@ -13,11 +13,15 @@ module.exports = (deployer, network) => {
     }
 
     if (!(network in uniswapFactoryAddresses)) {
+        const ConsensysToken = artifacts.require("./ConsensysToken");
+        const MoonToken = artifacts.require("./MoonToken");
         const SeanToken = artifacts.require("./SeanToken");
         const UniswapExchange = artifacts.require("./uniswap_exchange");
         const UniswapFactory = artifacts.require("./uniswap_factory");
 
         deployer.deploy(SeanToken);
+        deployer.deploy(MoonToken);
+        deployer.deploy(ConsensysToken);
         deployer.deploy(UniswapExchange);
         deployer.deploy(UniswapFactory)
             .then(() => deployer.deploy(CostAverageOrderBook, UniswapFactory.address));

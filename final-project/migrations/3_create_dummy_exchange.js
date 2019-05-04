@@ -2,6 +2,8 @@ const UniswapFactory = artifacts.require("./uniswap_factory");
 const UniswapExchange = artifacts.require("./uniswap_exchange");
 const UniswapExchangeInterface = artifacts.require("./UniswapExchangeInterface");
 const SeanToken = artifacts.require("./SeanToken");
+const MoonToken = artifacts.require("./MoonToken");
+const ConsensysToken = artifacts.require("./ConsensysToken");
 
 module.exports = (deployer, network, accounts) => {
     const uniswapFactoryAddresses = {
@@ -10,7 +12,6 @@ module.exports = (deployer, network, accounts) => {
     }
 
     if (!(network in uniswapFactoryAddresses)) {
-        let token;
         let factory;
         let exchangeTemplate;
 
@@ -25,25 +26,30 @@ module.exports = (deployer, network, accounts) => {
                 factory.initializeFactory(exchangeTemplate.address)
             })
             .then(() => SeanToken.deployed())
-            .then((instance) => token = instance)
-            .then(() => factory.createExchange(token.address))
-            // Add liquidity with ETH and SeanToken
-            .then(() => factory.getExchange(token.address))
-            .then(exchangeAddress => {
-                token.approve(exchangeAddress, 10000);
-                return exchangeAddress;
-            })
-            .then(exchangeAddress => UniswapExchangeInterface.at(exchangeAddress))
-            .then(exchange => {
-                const min_liquidity = 0;
-                const max_tokens = 10000;
-                const deadline = Math.floor(Date.now() / 1000) + 300;
-
-                console.log("deadline", deadline);
-                // console.log(Date.now());
-                exchange.addLiquidity(min_liquidity, max_tokens, deadline, {value: 5000000000000000000})
-                    // .then(result => console.log(result))
-                    .catch(err => console.log(err));
-            })
+            .then(instance => createExchangeWithLiquidity(
+                factory, instance, 5000000000000000000, 10000))
+            .then(() => MoonToken.deployed())
+            .then(instance => createExchangeWithLiquidity(
+                factory, instance, 10000000000000000000, 300000))
+            .then(() => ConsensysToken.deployed())
+            .then(instance => createExchangeWithLiquidity(
+                factory, instance, 3000000000000000000, 500000))
+            .catch(err => console.log(err));
     }
 };
+
+const createExchangeWithLiquidity = (factory, token, amountEth, amountTokens) => {
+    return factory.createExchange(token.address)
+        .then(() => factory.getExchange(token.address))
+        .then(exchangeAddress => {
+            token.approve(exchangeAddress, amountTokens);
+            return exchangeAddress;
+        })
+        .then(exchangeAddress => UniswapExchangeInterface.at(exchangeAddress))
+        .then(exchange => {
+            const min_liquidity = 0;
+            const max_tokens = 10000;
+            const deadline = Math.floor(Date.now() / 1000) + 300;
+            exchange.addLiquidity(min_liquidity, max_tokens, deadline, {value: amountEth});
+        })
+}
