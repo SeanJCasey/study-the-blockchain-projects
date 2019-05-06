@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import { DrizzleContext } from "drizzle-react";
 
+import OrderConversionActions from "../components/OrderConversionActions";
 import OrderTable from "../components/OrderTable";
 
 class OrderTableContainer extends Component {
-
   render() {
     return (
       <DrizzleContext.Consumer>
@@ -18,6 +18,7 @@ class OrderTableContainer extends Component {
           return (
             <div className="orderTableContainer">
               <OrderTable drizzle={drizzle} drizzleState={drizzleState} />
+              <OrderConversionActions drizzle={drizzle} drizzleState={drizzleState} />
             </div>
           );
         }}
