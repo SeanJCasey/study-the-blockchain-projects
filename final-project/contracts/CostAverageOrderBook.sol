@@ -117,15 +117,15 @@ contract CostAverageOrderBook {
         // Sanity checks
         require(order.sourceCurrencyBalance >= batchValue);
 
-        // Update values before performing conversion
+        // Update all values possible before performing conversion
         order.sourceCurrencyBalance -= batchValue;
         order.batchesExecuted += 1;
+        order.lastConversionTimestamp = now;
 
         // ** CONVERT HERE **
         uint256 amountReceived = exchangeCurrency(order.targetCurrency, batchValue);
 
-        // ** GET THE NO. TOKENS RECEIVED HERE **
-        // uint256 amountReceived = 10;
+        // Update total tokens converted
         order.targetCurrencyConverted += amountReceived;
     }
 
