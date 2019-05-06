@@ -8,6 +8,7 @@ body {
 
 .App {
   .orderBuilderContainer {
+    margin-top: 30px;
     .tokenLiquidityBlock {
       height: 100%;
       background-color: $gray-200;
@@ -19,5 +20,8 @@ body {
         margin-bottom: 20px;
       }
     }
+  }
+  .orderTableContainer {
+    margin-top: 30px;
   }
 }
