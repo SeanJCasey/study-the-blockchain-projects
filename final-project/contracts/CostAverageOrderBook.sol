@@ -2,14 +2,13 @@ pragma solidity ^0.5.2;
 
 // import safemath & use for division calc
 
+import '../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import './UniswapFactoryInterface.sol';
 import './UniswapExchangeInterface.sol';
 
-contract CostAverageOrderBook {
+contract CostAverageOrderBook is Ownable {
     uint256 public id;
-    // address private remoteCaller; // TODO
-
-    // address internal uniswapFactoryAddress;
+    address private remoteCaller; // address that can queue conversions
     UniswapFactoryInterface internal factory;
 
     struct OrderInfo {
@@ -29,8 +28,12 @@ contract CostAverageOrderBook {
     mapping(address => uint256[]) public ownerToOrderIds;
 
     constructor (address _uniswapFactoryAddress) public payable { // I think we need payable to instantiate the contract with ETH
-        // uniswapFactoryAddress = _uniswapFactoryAddress;
         factory = UniswapFactoryInterface(_uniswapFactoryAddress);
+        remoteCaller = msg.sender; // TODO: CHANGE TO SERVER'S WALLET
+    }
+
+    function setRemoteCaller (address _remoteCaller) public onlyOwner {
+        remoteCaller = _remoteCaller;
     }
 
     function createOrder (uint256 _amount, address _targetCurrency, uint256 _frequency, uint8 _batches) public payable returns (uint256 id_) {
@@ -98,7 +101,7 @@ contract CostAverageOrderBook {
 
     // THIS IS THE FUNCTION OUR SERVER WILL CALL TO EXECUTE ORDERS
     function executeDueConversions () external {
-        // require(msg.sender == remoteCaller);
+        require(msg.sender == remoteCaller);
 
         // Is it going to be super expensive to loop? Is there a better way to
         // do this? Should I return indexes to the server and have it call them one by one?
