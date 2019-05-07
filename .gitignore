@@ -1,3 +1,6 @@
 **node_modules
 *.DS_Store
 
+# contract builds
+*/build
+*/client/src/contracts
