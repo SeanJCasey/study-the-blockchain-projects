@@ -83,11 +83,11 @@ contract CostAverageOrderBook is Ownable {
     function checkConversionDue (uint256 _id) view public returns (bool) {
         OrderInfo memory order = idToCostAverageOrder[_id];
 
+        // Check if there is a balance of course currency
+        if (order.sourceCurrencyBalance <= 0) return false;
+
         // Check if there should be batches remaining
         if (order.batchesExecuted >= order.batches) return false;
-
-        // Make sure order is still active
-        // if (idIsActive[_id] == false) { return false; }
 
         // Check if the first conversion has been executed
         if (order.lastConversionTimestamp == 0) return true;
@@ -99,12 +99,10 @@ contract CostAverageOrderBook is Ownable {
         return true;
     }
 
-    // THIS IS THE FUNCTION OUR SERVER WILL CALL TO EXECUTE ORDERS
+    // THIS IS THE FUNCTION AN AWS SERVER WILL CALL TO EXECUTE ORDERS
     function executeDueConversions () external {
         require(msg.sender == remoteCaller);
 
-        // Is it going to be super expensive to loop? Is there a better way to
-        // do this? Should I return indexes to the server and have it call them one by one?
         for (uint256 i=0; i<=id; i++) {
             if (checkConversionDue(i) == true) {
                 convertCurrency(i);
@@ -118,7 +116,9 @@ contract CostAverageOrderBook is Ownable {
         uint256 batchValue = valuePerBatch(order.amount, order.batches);
 
         // Sanity checks
-        require(order.sourceCurrencyBalance >= batchValue);
+        if (order.sourceCurrencyBalance < batchValue) {
+            batchValue = order.sourceCurrencyBalance;
+        }
 
         // Update all values possible before performing conversion
         order.sourceCurrencyBalance -= batchValue;
