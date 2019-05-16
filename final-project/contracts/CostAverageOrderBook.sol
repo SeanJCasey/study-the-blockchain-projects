@@ -37,6 +37,11 @@ contract CostAverageOrderBook is Ownable {
         uint256 _orderId
     );
 
+    event CancelOrder(
+        address indexed _owner,
+        uint256 _orderId
+    );
+
     constructor (address _uniswapFactoryAddress) public payable { // I think we need payable to instantiate the contract with ETH
         factory = UniswapFactoryInterface(_uniswapFactoryAddress);
         remoteCaller = msg.sender; // TODO: CHANGE TO SERVER'S WALLET
@@ -73,22 +78,38 @@ contract CostAverageOrderBook is Ownable {
 
     function getOrder (uint256 _id) view public returns (
         uint256 id_, uint256 amount_, address targetCurrency_, uint256 frequency_, uint8 batches_,
-        uint8 batchesExecuted_, uint256 lastConversionTimestamp_, uint256 targetCurrencyConverted_) {
+        uint8 batchesExecuted_, uint256 lastConversionTimestamp_, uint256 targetCurrencyConverted_,
+        uint256 sourceCurrencyBalance_) {
         OrderInfo memory order = idToCostAverageOrder[_id];
 
         return (_id, order.amount, order.targetCurrency, order.frequency, order.batches,
-            order.batchesExecuted, order.lastConversionTimestamp, order.targetCurrencyConverted);
+            order.batchesExecuted, order.lastConversionTimestamp, order.targetCurrencyConverted,
+            order.sourceCurrencyBalance);
     }
 
     function getOrderForOwnerIndex (address _owner, uint256 _index) view public returns (
         uint256 id_, uint256 amount_, address targetCurrency_, uint256 frequency_, uint8 batches_,
-        uint8 batchesExecuted_, uint256 lastConversionTimestamp_, uint256 targetCurrencyConverted_) {
+        uint8 batchesExecuted_, uint256 lastConversionTimestamp_, uint256 targetCurrencyConverted_,
+        uint256 sourceCurrencyBalance_) {
         return getOrder(ownerToOrderIds[_owner][_index]);
     }
 
     function getOrderCountForOwner (address _owner) view public returns (
         uint256 count_) {
         count_ = ownerToOrderIds[_owner].length;
+    }
+
+    function cancelOrder (uint256 _id) public {
+        OrderInfo storage order = idToCostAverageOrder[_id];
+
+        require(order.owner == msg.sender);
+
+        uint256 refundAmount = order.sourceCurrencyBalance;
+        order.sourceCurrencyBalance = 0;
+
+        msg.sender.transfer(refundAmount);
+
+        emit CancelOrder(order.owner, _id);
     }
 
     // Q: should this be done by the server since it does not cost gas? Prob not b/c need to know within the current block...

@@ -8,6 +8,8 @@ contract('CostAverageOrderBook', accounts => {
     // let remoteCaller = accounts[3];
     let randomMaliciousUser = accounts[4];
 
+    const constructorAmount = web3.utils.toWei('0.1');
+
     // Order 1
     const orderId1 = 0;
     const contribAmount1 = web3.utils.toWei('5'); // using wei amount results in big num error
@@ -32,7 +34,14 @@ contract('CostAverageOrderBook', accounts => {
     beforeEach(async () => {
         const uniswapFactoryAddress = '0xB48C962C1883D25ce93a6610A293c9dbaBf33F90';
 
-        this.contract = await CostAverageOrderBook.new(uniswapFactoryAddress, {from: owner});
+        this.contract = await CostAverageOrderBook.new(uniswapFactoryAddress, {from: owner, value: constructorAmount });
+    });
+
+    describe('deploying a contract', () => {
+        it('has some ETH', async () => {
+            const contractBalance = await web3.eth.getBalance(this.contract.address);
+            assert.equal(contractBalance, constructorAmount);
+        });
     });
 
     describe('creating an order', () => {
@@ -81,6 +90,30 @@ contract('CostAverageOrderBook', accounts => {
             assert.equal(orders[1].id_, orderId3);
         });
 
+    });
+
+    describe('cancel an order', () => {
+        beforeEach(async () => {
+            await this.contract.createOrder(contribAmount1, targetCurrency1, frequency1, batches1, {from: user1, value: contribAmount1});
+        })
+
+        it('sets order source balance to 0', async () => {
+            await this.contract.cancelOrder(orderId1, {from: user1});
+
+            const orderInfo = await this.contract.getOrder(orderId1);
+
+            assert.equal(orderInfo.sourceCurrencyBalance_, 0);
+        });
+
+        it('fires an event', async () => {
+            const tx = await this.contract.cancelOrder(orderId1, {from: user1});
+
+            assert.equal(tx.logs[0].event, 'CancelOrder');
+        });
+
+        it('cannot be called by another user', async () => {
+            expectThrow(this.contract.cancelOrder(orderId1, {from: randomMaliciousUser}));
+        });
     });
 
     describe('remote caller', () => {
