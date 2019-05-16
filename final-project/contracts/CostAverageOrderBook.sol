@@ -1,15 +1,18 @@
 pragma solidity ^0.5.2;
 
-// import safemath & use for division calc
-
 import '../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import '../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol';
 import './UniswapFactoryInterface.sol';
 import './UniswapExchangeInterface.sol';
 
 contract CostAverageOrderBook is Ownable {
+    using SafeMath for uint256;
+
     uint256 public id;
     address private remoteCaller; // address that can queue conversions
     UniswapFactoryInterface internal factory;
+    uint256 private feeBalance;
+    uint256 private feesWithdrawn;
 
     struct OrderInfo {
         address owner;
@@ -103,6 +106,7 @@ contract CostAverageOrderBook is Ownable {
         OrderInfo storage order = idToCostAverageOrder[_id];
 
         require(order.owner == msg.sender);
+        require(order.sourceCurrencyBalance > 0);
 
         uint256 refundAmount = order.sourceCurrencyBalance;
         order.sourceCurrencyBalance = 0;
@@ -110,6 +114,19 @@ contract CostAverageOrderBook is Ownable {
         msg.sender.transfer(refundAmount);
 
         emit CancelOrder(order.owner, _id);
+    }
+
+    function withdrawFees () public onlyOwner {
+        require (feeBalance > 0);
+
+        feesWithdrawn.add(feeBalance);
+        feeBalance = 0;
+
+        msg.sender.transfer(feeBalance);
+    }
+
+    function getTotalFeesCollected() view public returns (uint256) {
+        return feeBalance.add(feesWithdrawn);
     }
 
     // Q: should this be done by the server since it does not cost gas? Prob not b/c need to know within the current block...
@@ -156,8 +173,12 @@ contract CostAverageOrderBook is Ownable {
         order.batchesExecuted += 1;
         order.lastConversionTimestamp = now;
 
+        // Impose the fee here
+        uint256 fee = batchValue.div(200); // 0.005%
+        feeBalance += fee;
+
         // ** CONVERT HERE **
-        uint256 amountReceived = exchangeCurrency(order.targetCurrency, batchValue);
+        uint256 amountReceived = exchangeCurrency(order.targetCurrency, batchValue.sub(fee));
 
         // Update total tokens converted
         order.targetCurrencyConverted += amountReceived;
@@ -179,6 +200,6 @@ contract CostAverageOrderBook is Ownable {
 
     // TODO: deal with uneven divisibility
     function valuePerBatch(uint256 _amount, uint8 _batches) pure internal returns (uint256) {
-        return _amount / _batches;
+        return _amount.div(_batches);
     }
 }
