@@ -11,6 +11,8 @@ class OrderTable extends Component {
       'orderCountKey': null,
       'orderKeys': [],
     }
+
+    this.handleCancelOrderClick = this.handleCancelOrderClick.bind(this);
   }
 
   componentDidMount() {
@@ -40,11 +42,21 @@ class OrderTable extends Component {
     }
   }
 
+  handleCancelOrderClick(event) {
+    const orderId = event.target.value;
+    const contract = this.props.drizzle.contracts.CostAverageOrderBook;
+
+    contract.methods.cancelOrder(orderId).send()
+      .then(res => console.log(res))
+      .catch(err => console.log(err));
+  }
+
   render() {
     const { drizzle, drizzleState } = this.props;
     const { orderKeys } = this.state;
 
     let orders = [];
+    let ordersFinished = [];
     for (const orderKey of orderKeys) {
       const orderState = drizzleState.contracts.CostAverageOrderBook.getOrderForOwnerIndex[orderKey];
       if (orderState) {
@@ -56,47 +68,101 @@ class OrderTable extends Component {
           'batches': Number(orderState.value.batches_),
           'batchesExecuted': Number(orderState.value.batchesExecuted_),
           'targetCurrencyConverted': Number(orderState.value.targetCurrencyConverted_),
-          'lastConversionTimestamp': Number(orderState.value.lastConversionTimestamp_)
+          'lastConversionTimestamp': Number(orderState.value.lastConversionTimestamp_),
+          'sourceCurrencyBalance': Number(orderState.value.sourceCurrencyBalance_)
         }
         order['nextConversionTimestamp'] = order['lastConversionTimestamp'] > 0 ? order['lastConversionTimestamp'] + order['frequency'] : 0;
-        orders.push(order);
+        order['isActive'] = order['sourceCurrencyBalance'] > 0;
+        order['isActive'] ? orders.push(order) : ordersFinished.push(order);
       }
     }
+    const activeOrderMap = orders.map((order, i) => {
+      return (
+        <tr key={order.id}>
+          <td>{order.id}</td>
+          <td>{order.amount}</td>
+          <td>{TOKENTABLE[order.targetCurrency] ? TOKENTABLE[order.targetCurrency].name : order.targetCurrency}</td>
+          <td>{TIMETABLE[order.frequency] ? TIMETABLE[order.frequency] : `${order.frequency} seconds `}</td>
+          <td>{order.batchesExecuted} / {order.batches}</td>
+          <td>{order.targetCurrencyConverted} {TOKENTABLE[order.targetCurrency] ? TOKENTABLE[order.targetCurrency].symbol : ""}</td>
+          <td>{order.lastConversionTimestamp > 0 ? dateObjDisplayFormatter(new Date(order.lastConversionTimestamp * 1000)) : "n/a"}</td>
+          <td>{order.nextConversionTimestamp > 0 ? dateObjDisplayFormatter(new Date(order.nextConversionTimestamp * 1000)) : "overdue!"}</td>
+          <td>
+            <button
+              className="btn btn-outline-danger btn-sm"
+              value={order.id}
+              style={{ padding: "0px 5px" }}
+              onClick={this.handleCancelOrderClick}
+            >
+              Cancel
+            </button>
+          </td>
+        </tr>
+      );
+    })
+    const archivedOrderMap = ordersFinished.map((order, i) => {
+      return (
+        <tr key={order.id}>
+          <td>{order.id}</td>
+          <td>{order.amount}</td>
+          <td>{TOKENTABLE[order.targetCurrency] ? TOKENTABLE[order.targetCurrency].name : order.targetCurrency}</td>
+          <td>{TIMETABLE[order.frequency] ? TIMETABLE[order.frequency] : `${order.frequency} seconds `}</td>
+          <td>{order.batchesExecuted} / {order.batches}</td>
+          <td>{order.targetCurrencyConverted} {TOKENTABLE[order.targetCurrency] ? TOKENTABLE[order.targetCurrency].symbol : ""}</td>
+          <td>{order.lastConversionTimestamp > 0 ? dateObjDisplayFormatter(new Date(order.lastConversionTimestamp * 1000)) : "n/a"}</td>
+          <td>{order.batchesExecuted < order.batches ? 'cancelled' : 'completed'}</td>
+        </tr>
+      );
+    })
 
     return (
       <div className="orderTable">
         <h2>Your Orders</h2>
         <p>Account {drizzleState.accounts[0]}</p>
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th scope="col">Order #</th>
-              <th scope="col">No of ETH</th>
-              <th scope="col">Target Token</th>
-              <th scope="col">Frequency</th>
-              <th scope="col">Batches</th>
-              <th scope="col">Converted</th>
-              <th scope="col">Last</th>
-              <th scope="col">Next</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((order, i) => {
-              return (
-                <tr key={order.id}>
-                  <td>{order.id}</td>
-                  <td>{order.amount}</td>
-                  <td>{TOKENTABLE[order.targetCurrency] ? TOKENTABLE[order.targetCurrency].name : order.targetCurrency}</td>
-                  <td>{TIMETABLE[order.frequency] ? TIMETABLE[order.frequency] : `${order.frequency} seconds `}</td>
-                  <td>{order.batchesExecuted} / {order.batches}</td>
-                  <td>{order.targetCurrencyConverted} {TOKENTABLE[order.targetCurrency] ? TOKENTABLE[order.targetCurrency].symbol : ""}</td>
-                  <td>{order.lastConversionTimestamp > 0 ? dateObjDisplayFormatter(new Date(order.lastConversionTimestamp * 1000)) : "n/a"}</td>
-                  <td>{order.nextConversionTimestamp > 0 ? dateObjDisplayFormatter(new Date(order.nextConversionTimestamp * 1000)) : "overdue!"}</td>
+        {orders.length > 0 &&
+          <div className="active-orders">
+            <h3>Active</h3>
+            <table className="table table-striped">
+              <thead>
+                <tr>
+                  <th scope="col">Order #</th>
+                  <th scope="col">No of ETH</th>
+                  <th scope="col">Target Token</th>
+                  <th scope="col">Frequency</th>
+                  <th scope="col">Batches</th>
+                  <th scope="col">Converted</th>
+                  <th scope="col">Last</th>
+                  <th scope="col">Next</th>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                {activeOrderMap}
+              </tbody>
+            </table>
+          </div>
+        }
+        {ordersFinished.length > 0 &&
+          <div className="archived-orders">
+          <h3>Archived</h3>
+            <table className="table table-striped">
+              <thead>
+                <tr>
+                  <th scope="col">Order #</th>
+                  <th scope="col">No of ETH</th>
+                  <th scope="col">Target Token</th>
+                  <th scope="col">Frequency</th>
+                  <th scope="col">Batches</th>
+                  <th scope="col">Converted</th>
+                  <th scope="col">Last</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {archivedOrderMap}
+              </tbody>
+            </table>
+          </div>
+        }
       </div>
     );
   }
