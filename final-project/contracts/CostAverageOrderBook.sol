@@ -27,6 +27,16 @@ contract CostAverageOrderBook is Ownable {
     mapping(uint256 => OrderInfo) public idToCostAverageOrder; // internal or public?
     mapping(address => uint256[]) public ownerToOrderIds;
 
+    event NewOrder(
+        address indexed _owner,
+        uint256 _orderId
+    );
+
+    event OrderConversion(
+        address indexed _owner,
+        uint256 _orderId
+    );
+
     constructor (address _uniswapFactoryAddress) public payable { // I think we need payable to instantiate the contract with ETH
         factory = UniswapFactoryInterface(_uniswapFactoryAddress);
         remoteCaller = msg.sender; // TODO: CHANGE TO SERVER'S WALLET
@@ -53,6 +63,8 @@ contract CostAverageOrderBook is Ownable {
 
         idToCostAverageOrder[id] = newOrder;
         ownerToOrderIds[msg.sender].push(id);
+
+        emit NewOrder(msg.sender, id);
 
         id++;
 
@@ -115,10 +127,8 @@ contract CostAverageOrderBook is Ownable {
 
         uint256 batchValue = valuePerBatch(order.amount, order.batches);
 
-        // Sanity checks
-        if (order.sourceCurrencyBalance < batchValue) {
-            batchValue = order.sourceCurrencyBalance;
-        }
+        // In case the batchValue is somehow more than the balance, use the remainder
+        if (order.sourceCurrencyBalance < batchValue) batchValue = order.sourceCurrencyBalance;
 
         // Update all values possible before performing conversion
         order.sourceCurrencyBalance -= batchValue;
@@ -130,6 +140,8 @@ contract CostAverageOrderBook is Ownable {
 
         // Update total tokens converted
         order.targetCurrencyConverted += amountReceived;
+
+        emit OrderConversion(order.owner, _id);
     }
 
 
