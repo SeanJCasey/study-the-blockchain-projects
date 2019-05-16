@@ -131,8 +131,8 @@ class OrderTable extends Component {
                   <th scope="col">Frequency</th>
                   <th scope="col">Batches</th>
                   <th scope="col">Converted</th>
-                  <th scope="col">Last</th>
-                  <th scope="col">Next</th>
+                  <th scope="col">Last Trade</th>
+                  <th scope="col">Next Trade</th>
                 </tr>
               </thead>
               <tbody>
@@ -153,7 +153,7 @@ class OrderTable extends Component {
                   <th scope="col">Frequency</th>
                   <th scope="col">Batches</th>
                   <th scope="col">Converted</th>
-                  <th scope="col">Last</th>
+                  <th scope="col">Last Trade</th>
                   <th scope="col">Status</th>
                 </tr>
               </thead>
