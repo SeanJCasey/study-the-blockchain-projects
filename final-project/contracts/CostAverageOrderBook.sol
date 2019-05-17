@@ -10,9 +10,14 @@ contract CostAverageOrderBook is Ownable {
 
     uint256 public id;
     address private remoteCaller; // address that can queue conversions
-    UniswapFactoryInterface internal factory;
     uint256 private feeBalance;
     uint256 private feesWithdrawn;
+    uint256 public minAmount = 0.1 ether;
+    uint32 public minFrequency = 3600;
+    uint8 public minBatches = 1;
+    uint8 public maxBatches = 255;
+
+    UniswapFactoryInterface internal factory;
 
     struct OrderInfo {
         address owner;
@@ -57,6 +62,11 @@ contract CostAverageOrderBook is Ownable {
     function createOrder (uint256 _amount, address _targetCurrency, uint256 _frequency, uint8 _batches) public payable returns (uint256 id_) {
         require(_amount == msg.value); // Can't use this if they send DAI
 
+        // Enforce minimums for params
+        require(_frequency >= minFrequency);
+        require(_batches >= minBatches);
+        require(_amount >= minAmount);
+
         OrderInfo memory newOrder = OrderInfo({
             amount: _amount,
             targetCurrency: _targetCurrency,
@@ -100,6 +110,11 @@ contract CostAverageOrderBook is Ownable {
     function getOrderCountForOwner (address _owner) view public returns (
         uint256 count_) {
         count_ = ownerToOrderIds[_owner].length;
+    }
+
+    function getOrderParamLimits() view public returns (uint256 minAmount_, uint32 minFrequency_,
+        uint8 minBatches_, uint8 maxBatches_) {
+        return (minAmount, minFrequency, minBatches, maxBatches);
     }
 
     function cancelOrder (uint256 _id) public {
