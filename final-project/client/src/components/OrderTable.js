@@ -115,8 +115,10 @@ class OrderTable extends Component {
       );
     })
 
+    if (!(orders.length > 0 || ordersFinished.length > 0)) return(<div></div>);
+
     return (
-      <div className="orderTable">
+      <div className="orderTables">
         <h2>Your Orders</h2>
         <p>Account {drizzleState.accounts[0]}</p>
         {orders.length > 0 &&
