@@ -16,11 +16,21 @@ class OrderBuilderContainer extends Component {
         'frequency': '',
         'batches': ''
       },
-      'newOrderStackId': ''
+      'newOrderStackId': '',
+      'orderParamLimitsKey': null,
+      'formErrors': {}
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  componentDidMount() {
+    const { drizzle } = this.props;
+    const contract = drizzle.contracts.CostAverageOrderBook;
+    const orderParamLimitsKey = contract.methods["getOrderParamLimits"].cacheCall();
+
+    this.setState({ orderParamLimitsKey });
   }
 
   createOrder() {
@@ -40,6 +50,22 @@ class OrderBuilderContainer extends Component {
     this.setState({ newOrderStackId });
   }
 
+  handleFormValidation() {
+    const { orderParamLimitsKey } = this.state;
+    const { drizzle, drizzleState } = this.props;
+    const orderParamLimits = drizzleState.contracts.CostAverageOrderBook.getOrderParamLimits[orderParamLimitsKey];
+
+    const formErrors = {};
+
+    const minAmount = drizzle.web3.utils.fromWei(String(orderParamLimits.value.minAmount_), 'ether');
+    const minBatches = orderParamLimits.value.minBatches_;
+
+    if (this.state.newOrderInputs.quantity < minAmount) formErrors['quantity'] = { message: `Must be greater than ${minAmount} ETH` };
+    if (this.state.newOrderInputs.batches < minBatches) formErrors['batches'] = { message: `Must be greater than ${minBatches}` };
+
+    return formErrors;
+  }
+
   handleInputChange(event) {
     this.setState({
       newOrderInputs: {
@@ -52,7 +78,14 @@ class OrderBuilderContainer extends Component {
   handleSubmit(event) {
     event.preventDefault();
 
-    this.createOrder()
+    const formErrors = this.handleFormValidation();
+
+    if (Object.keys(formErrors).length) {
+      this.setState({ formErrors });
+    }
+    else {
+      this.createOrder();
+    }
   }
 
   render() {
@@ -62,6 +95,7 @@ class OrderBuilderContainer extends Component {
         <div className="row">
           <div className="col-sm-8">
             <OrderForm
+              formErrors={this.state.formErrors}
               onSubmit={this.handleSubmit}
               onInputChange={this.handleInputChange}
             />

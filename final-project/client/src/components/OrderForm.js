@@ -1,7 +1,7 @@
 import React from 'react';
 import { TOKENTABLE, TIMETABLE } from '../constants';
 
-const OrderForm = ({ onInputChange, onSubmit }) =>
+const OrderForm = ({ formErrors, onInputChange, onSubmit }) =>
   <form id="createCostAverageOrderForm" onSubmit={onSubmit}>
     <div className="form-group">
       <label htmlFor="createCostAverageOrderQuantityInput">Amount to Convert</label>
@@ -9,11 +9,16 @@ const OrderForm = ({ onInputChange, onSubmit }) =>
         name="quantity"
         type="text"
         placeholder="No of ETH"
-        className="form-control"
+        className={`form-control ${formErrors && formErrors.quantity ? 'is-invalid' : ''}`}
         id="createCostAverageOrderQuantityInput"
         onChange={onInputChange}
         required
       />
+      {formErrors && formErrors.quantity &&
+        <div className="invalid-feedback">
+          {formErrors.quantity.message}
+        </div>
+      }
     </div>
     <div className="form-group">
       <label htmlFor="createCostAverageOrderTokenAddressInput">Target Currency</label>
@@ -53,11 +58,16 @@ const OrderForm = ({ onInputChange, onSubmit }) =>
         name="batches"
         type="number"
         placeholder="number of orders"
-        className="form-control"
+        className={`form-control ${formErrors && formErrors.batches ? 'is-invalid' : ''}`}
         id="createCostAverageOrderTranchesInput"
         onChange={onInputChange}
         required
       />
+      {formErrors && formErrors.batches &&
+        <div className="invalid-feedback">
+          {formErrors.batches.message}
+        </div>
+      }
     </div>
 
     <button type="submit" className="btn btn-primary" id="createCostAverageOrderButton">Vulcanize!</button>
