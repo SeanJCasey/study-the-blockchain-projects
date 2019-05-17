@@ -119,10 +119,11 @@ contract CostAverageOrderBook is Ownable {
     function withdrawFees () public onlyOwner {
         require (feeBalance > 0);
 
-        feesWithdrawn.add(feeBalance);
+        uint256 withdrawalAmount = feeBalance;
         feeBalance = 0;
+        feesWithdrawn.add(withdrawalAmount);
 
-        msg.sender.transfer(feeBalance);
+        msg.sender.transfer(withdrawalAmount);
     }
 
     function getTotalFeesCollected() view public returns (uint256) {
@@ -174,7 +175,7 @@ contract CostAverageOrderBook is Ownable {
         order.lastConversionTimestamp = now;
 
         // Impose the fee here
-        uint256 fee = batchValue.div(200); // 0.005%
+        uint256 fee = batchValue.div(200); // 0.5%
         feeBalance += fee;
 
         // ** CONVERT HERE **
