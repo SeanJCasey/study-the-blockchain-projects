@@ -9,7 +9,7 @@ contract CostAverageOrderBook is Ownable {
     using SafeMath for uint256;
 
     uint256 public id;
-    address private remoteCaller; // address that can queue conversions
+    address private remoteCaller;
     uint256 private feeBalance;
     uint256 private feesWithdrawn;
     uint256 public minAmount = 0.1 ether;
@@ -22,17 +22,15 @@ contract CostAverageOrderBook is Ownable {
     struct OrderInfo {
         address owner;
         address targetCurrency;
-        // address contribCurrency; // either ETH or DAI // consider enum
         uint256 amount;
         uint256 frequency; // in seconds
         uint256 lastConversionTimestamp;
         uint256 sourceCurrencyBalance;
         uint256 targetCurrencyConverted;
-        uint8 batches; // number of batches, up to 255
+        uint8 batches;
         uint8 batchesExecuted;
-        // bool isActive; // wait until need this
     }
-    mapping(uint256 => OrderInfo) public idToCostAverageOrder; // internal or public?
+    mapping(uint256 => OrderInfo) public idToCostAverageOrder;
     mapping(address => uint256[]) public ownerToOrderIds;
 
     event NewOrder(
@@ -73,7 +71,7 @@ contract CostAverageOrderBook is Ownable {
             frequency: _frequency,
             batches: _batches,
             owner: msg.sender,
-            sourceCurrencyBalance: _amount, // take fee from here
+            sourceCurrencyBalance: _amount,
             targetCurrencyConverted: 0,
             batchesExecuted: 0,
             lastConversionTimestamp: 0
@@ -107,9 +105,8 @@ contract CostAverageOrderBook is Ownable {
         return getOrder(ownerToOrderIds[_owner][_index]);
     }
 
-    function getOrderCountForOwner (address _owner) view public returns (
-        uint256 count_) {
-        count_ = ownerToOrderIds[_owner].length;
+    function getOrderCountForOwner (address _owner) view public returns (uint256 count_) {
+        return ownerToOrderIds[_owner].length;
     }
 
     function getOrderParamLimits() view public returns (uint256 minAmount_, uint32 minFrequency_,
@@ -145,11 +142,10 @@ contract CostAverageOrderBook is Ownable {
         return feeBalance.add(feesWithdrawn);
     }
 
-    // Q: should this be done by the server since it does not cost gas? Prob not b/c need to know within the current block...
     function checkConversionDue (uint256 _id) view public returns (bool) {
         OrderInfo memory order = idToCostAverageOrder[_id];
 
-        // Check if there is a balance of course currency
+        // Check if there is a balance of source currency
         if (order.sourceCurrencyBalance <= 0) return false;
 
         // Check if there should be batches remaining
@@ -158,14 +154,14 @@ contract CostAverageOrderBook is Ownable {
         // Check if the first conversion has been executed
         if (order.lastConversionTimestamp == 0) return true;
 
-        // Check if enough time has lapsed to execute the next conversion
+        // Check if enough time has elapsed to execute the next conversion
         uint256 timeDelta = now - order.lastConversionTimestamp;
         if (timeDelta < order.frequency) return false;
 
         return true;
     }
 
-    // THIS IS THE FUNCTION AN AWS SERVER WILL CALL TO EXECUTE ORDERS
+    // Remote server calls this function to execute overdue converstions
     function executeDueConversions () external {
         require(msg.sender == remoteCaller);
 
@@ -193,8 +189,8 @@ contract CostAverageOrderBook is Ownable {
         uint256 fee = batchValue.div(200); // 0.5%
         feeBalance += fee;
 
-        // ** CONVERT HERE **
-        uint256 amountReceived = exchangeCurrency(order.targetCurrency, batchValue.sub(fee));
+        // ETH converted to tokens here
+        uint256 amountReceived = exchangeCurrency(order.owner, order.targetCurrency, batchValue.sub(fee));
 
         // Update total tokens converted
         order.targetCurrencyConverted += amountReceived;
@@ -202,16 +198,14 @@ contract CostAverageOrderBook is Ownable {
         emit OrderConversion(order.owner, _id);
     }
 
-
-    // TODO: can also use ethToTokenTransferInput with `recipient` param to transfer tokens directly to the user
-    function exchangeCurrency(address _targetCurrency, uint256 _amountSourceCurrency) private returns (uint256 amountReceived_) {
+    function exchangeCurrency(address _owner, address _targetCurrency, uint256 _amountSourceCurrency) private returns (uint256 amountReceived_) {
         // Set up the Uniswap exchange interface by finding the token's address via the factory
         address exchangeAddress = factory.getExchange(_targetCurrency);
         UniswapExchangeInterface exchange = UniswapExchangeInterface(exchangeAddress);
 
         uint256 min_tokens = 1; // TODO: implement this correctly, see "sell order" logic in docs
         uint256 deadline = now + 300; // this is the value in the docs; used so nodes can't hold off on unsigned txs and wait for optimal times to sell/arbitrage
-        amountReceived_ = exchange.ethToTokenSwapInput.value(_amountSourceCurrency)(min_tokens, deadline); // change from swap to transfer and add recipient
+        amountReceived_ = exchange.ethToTokenTransferInput.value(_amountSourceCurrency)(min_tokens, deadline, _owner);
     }
 
     // TODO: deal with uneven divisibility
