@@ -119,11 +119,9 @@ class OrderTable extends Component {
 
     return (
       <div className="orderTables">
-        <h2>Your Orders</h2>
-        <p>Account {drizzleState.accounts[0]}</p>
         {orders.length > 0 &&
           <div className="active-orders">
-            <h3>Active</h3>
+            <h3>Active Orders</h3>
             <table className="table table-striped">
               <thead>
                 <tr>
@@ -145,7 +143,7 @@ class OrderTable extends Component {
         }
         {ordersFinished.length > 0 &&
           <div className="archived-orders">
-          <h3>Archived</h3>
+          <h3>Archived Orders</h3>
             <table className="table table-striped">
               <thead>
                 <tr>
