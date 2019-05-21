@@ -34,6 +34,7 @@ class ContractStatsBlock extends Component {
 
     return (
       <div className="contractStatsBlock">
+        <strong>Vulcanizer totals</strong>
         <div className="orders">
           Orders created: {nextOrderId && nextOrderId.value}
         </div>
@@ -41,10 +42,10 @@ class ContractStatsBlock extends Component {
           Trades executed:
         </div>
         <div className="balance">
-          ETH under management: {drizzle.web3.utils.fromWei(contractBalance.toString(), 'ether')} ETH
+          ETH under management: {parseFloat(drizzle.web3.utils.fromWei(contractBalance.toString(), 'ether')).toFixed(4)} ETH
         </div>
         <div className="fees">
-          Fees collected: {feesCollected && drizzle.web3.utils.fromWei(feesCollected.value, 'ether')} ETH
+          Fees collected: {feesCollected && parseFloat(drizzle.web3.utils.fromWei(feesCollected.value, 'ether')).toFixed(4)} ETH
         </div>
       </div>
     );
