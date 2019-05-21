@@ -1,4 +1,7 @@
 import CostAverageOrderBook from "./contracts/CostAverageOrderBook.json";
+import ConsensysToken from "./contracts/ConsensysToken.json";
+import MoonToken from "./contracts/MoonToken.json";
+import SeanToken from "./contracts/SeanToken.json";
 import UniswapFactoryInterface from "./contracts/UniswapFactoryInterface.json";
 
 import Web3 from 'web3';
@@ -9,6 +12,9 @@ const UNISWAP_FACTORY_ADDRESS = process.env.REACT_APP_UNISWAP_FACTORY_ADDRESS;
 const options = {
   contracts: [
     CostAverageOrderBook,
+    ConsensysToken,
+    MoonToken,
+    SeanToken,
     {
         contractName: 'UniswapFactoryInterface',
         web3Contract: new web3.eth.Contract(
@@ -17,21 +23,14 @@ const options = {
             { data: 'deployedBytecode' }
         )
     },
-    // {
-    //     contractName: 'UniswapExchangeInterface',
-    //     web3Contract: new web3.eth.Contract(
-    //         UniswapFactoryInterface.abi,
-    //         "",
-    //         { data: 'deployedBytecode' }
-    //     )
-    // },
   ],
   // events: {
-  //   SimpleStorage: ["StorageSet"],
+  //   CostAverageOrderBook: ["StorageSet"],
   // },
-  // polls: {
-  //   accounts: 1500,
-  // },
+  polls: {
+    accounts: 3000,
+    blocks: 10000
+  },
   web3: {
     fallback: {
       type: "ws",

@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { DrizzleContext } from "drizzle-react";
 
+import AccountStatsBlock from '../components/AccountStatsBlock';
 import ContractStatsBlock from "../components/ContractStatsBlock";
 
-class ContractStatsContainer extends Component {
+class StatsContainer extends Component {
   render() {
     return (
       <DrizzleContext.Consumer>
@@ -16,7 +17,14 @@ class ContractStatsContainer extends Component {
 
           return (
             <div className="contractStatsContainer">
-              <ContractStatsBlock drizzle={drizzle} drizzleState={drizzleState} />
+              <div className="row">
+                <div className="col-sm-6">
+                  <AccountStatsBlock drizzle={drizzle} drizzleState={drizzleState} />
+                </div>
+                <div className="col-sm-6">
+                  <ContractStatsBlock drizzle={drizzle} drizzleState={drizzleState} />
+                </div>
+              </div>
             </div>
           );
         }}
@@ -26,4 +34,4 @@ class ContractStatsContainer extends Component {
   }
 }
 
-export default ContractStatsContainer;
+export default StatsContainer;
