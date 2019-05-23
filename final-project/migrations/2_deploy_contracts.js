@@ -12,22 +12,31 @@ module.exports = (deployer, network) => {
         "rinkeby": "0xf5D915570BC477f9B8D6C0E980aA81757A3AaC36"
     }
 
-    if (!(network in uniswapFactoryAddresses)) {
+    // If not mainnet, deploy our ERC20 tokens
+    if (network !== 'mainnet') {
         const ConsensysToken = artifacts.require("./ConsensysToken");
         const MoonToken = artifacts.require("./MoonToken");
         const SeanToken = artifacts.require("./SeanToken");
-        const UniswapExchange = artifacts.require("./uniswap_exchange");
-        const UniswapFactory = artifacts.require("./uniswap_factory");
 
         deployer.deploy(SeanToken);
         deployer.deploy(MoonToken);
         deployer.deploy(ConsensysToken);
-        deployer.deploy(UniswapExchange);
-        deployer.deploy(UniswapFactory)
-            .then(() => deployer.deploy(CostAverageOrderBook, UniswapFactory.address));
     }
 
+    // If not mainnet or rinkeby, deploy uniswap mock contracts
+    if (!(network in uniswapFactoryAddresses)) {
+        const UniswapExchange = artifacts.require("./uniswap_exchange");
+        const UniswapFactory = artifacts.require("./uniswap_factory");
+
+        let exchangeTemplate;
+
+        deployer.deploy(UniswapExchange)
+            .then(instance => exchangeTemplate = instance)
+            .then(() => deployer.deploy(UniswapFactory))
+            .then(instance => instance.initializeFactory(exchangeTemplate.address))
+            .then(() => deployer.deploy(CostAverageOrderBook, UniswapFactory.address, { value: 1000000000000000000 }));
+    }
     else {
-        deployer.deploy(CostAverageOrderBook, uniswapFactoryAddresses[network]);
+        deployer.deploy(CostAverageOrderBook, uniswapFactoryAddresses[network], { value: 1000000000000000000 });
     }
 };

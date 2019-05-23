@@ -1,6 +1,6 @@
 const UniswapFactory = artifacts.require("./uniswap_factory");
-const UniswapExchange = artifacts.require("./uniswap_exchange");
 const UniswapExchangeInterface = artifacts.require("./UniswapExchangeInterface");
+const UniswapFactoryInterface = artifacts.require("./UniswapFactoryInterface");
 const SeanToken = artifacts.require("./SeanToken");
 const MoonToken = artifacts.require("./MoonToken");
 const ConsensysToken = artifacts.require("./ConsensysToken");
@@ -11,36 +11,31 @@ module.exports = (deployer, network, accounts) => {
         "rinkeby": "0xf5D915570BC477f9B8D6C0E980aA81757A3AaC36"
     }
 
+    // Create fake tokens if not mainnet
     if (!(network in uniswapFactoryAddresses)) {
-        let factory;
-        let exchangeTemplate;
+        let iFactory;
 
         deployer
-            .then(() => UniswapExchange.deployed())
-            .then((instance) => {
-                exchangeTemplate = instance;
-            })
             .then(() => UniswapFactory.deployed())
-            .then((instance) => {
-                factory = instance;
-                factory.initializeFactory(exchangeTemplate.address)
-            })
+            .then(instance => uniswapFactoryAddresses[network] = instance.address)
+            .then(() => UniswapFactoryInterface.at(uniswapFactoryAddresses[network]))
+            .then(instance => iFactory = instance)
             .then(() => SeanToken.deployed())
             .then(instance => createExchangeWithLiquidity(
-                factory, instance, 5000000000000000000, 10000))
+                iFactory, instance, 5000000000000000000, 10000))
             .then(() => MoonToken.deployed())
             .then(instance => createExchangeWithLiquidity(
-                factory, instance, 10000000000000000000, 300000))
+                iFactory, instance, 10000000000000000000, 300000))
             .then(() => ConsensysToken.deployed())
             .then(instance => createExchangeWithLiquidity(
-                factory, instance, 3000000000000000000, 500000))
+                iFactory, instance, 3000000000000000000, 500000))
             .catch(err => console.log(err));
     }
 };
 
-const createExchangeWithLiquidity = (factory, token, amountEth, amountTokens) => {
-    return factory.createExchange(token.address)
-        .then(() => factory.getExchange(token.address))
+const createExchangeWithLiquidity = (iFactory, token, amountEth, amountTokens) => {
+    return iFactory.createExchange(token.address)
+        .then(() => iFactory.getExchange(token.address))
         .then(exchangeAddress => {
             token.approve(exchangeAddress, amountTokens);
             return exchangeAddress;
