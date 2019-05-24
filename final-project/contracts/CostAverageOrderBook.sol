@@ -185,6 +185,18 @@ contract CostAverageOrderBook is Ownable {
         return true;
     }
 
+    function checkConversionDueAll() view public returns (uint256[] memory) {
+        require(msg.sender == remoteCaller);
+
+        uint256[] memory coversionDueMap = new uint256[](getOrderCount());
+
+        for (uint256 i=1; i<=getOrderCount(); i++) {
+            if (checkConversionDue(i) == true) coversionDueMap[i-1] = i;
+        }
+
+        return coversionDueMap;
+    }
+
     function convertCurrency(uint256 _id) private {
         OrderInfo storage order = idToCostAverageOrder[_id];
 
@@ -221,7 +233,16 @@ contract CostAverageOrderBook is Ownable {
         amountReceived_ = exchange.ethToTokenTransferInput.value(_amountSourceCurrency)(min_tokens, deadline, _account);
     }
 
-    // Remote server calls this function to execute overdue converstions
+    // Remote server calls to execute converstions 1-by-1
+    function executeDueConversion (uint256 _id) public {
+        require(msg.sender == remoteCaller);
+
+        if (checkConversionDue(_id) == true) {
+            convertCurrency(_id);
+        }
+    }
+
+    // Remote server calls to execute conversions en masse
     function executeDueConversions () external {
         require(msg.sender == remoteCaller);
 
