@@ -188,10 +188,29 @@ contract CostAverageOrderBook is Ownable {
     function checkConversionDueAll() view public returns (uint256[] memory) {
         require(msg.sender == remoteCaller);
 
-        uint256[] memory coversionDueMap = new uint256[](getOrderCount());
+        uint256 totalOrderCount = getOrderCount();
+        require(totalOrderCount > 0);
 
-        for (uint256 i=1; i<=getOrderCount(); i++) {
+        uint256[] memory coversionDueMap = new uint256[](totalOrderCount);
+
+        for (uint256 i=1; i<=totalOrderCount; i++) {
             if (checkConversionDue(i) == true) coversionDueMap[i-1] = i;
+        }
+
+        return coversionDueMap;
+    }
+
+    function checkConversionDueBatch(uint256 _idStart, uint16 _count) view public returns (uint256[] memory) {
+        require(msg.sender == remoteCaller);
+
+        uint256 totalOrderCount = getOrderCount();
+        require(_idStart > 0);
+        require(_idStart <= totalOrderCount);
+
+        uint256[] memory coversionDueMap = new uint256[](_count);
+
+        for (uint256 i=0; i<_count && _idStart.add(i) <= totalOrderCount; i++) {
+            if (checkConversionDue(_idStart.add(i)) == true) coversionDueMap[i] = _idStart.add(i);
         }
 
         return coversionDueMap;
