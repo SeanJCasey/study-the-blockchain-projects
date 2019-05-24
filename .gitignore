@@ -4,3 +4,6 @@
 # contract builds
 */build
 */client/src/contracts
+
+# private files
+*.secret
