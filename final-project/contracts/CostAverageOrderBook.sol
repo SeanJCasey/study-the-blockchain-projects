@@ -53,8 +53,18 @@ contract CostAverageOrderBook is Ownable {
         remoteCaller = msg.sender; // TODO: CHANGE TO SERVER'S WALLET
     }
 
-    function setRemoteCaller (address _remoteCaller) public onlyOwner {
-        remoteCaller = _remoteCaller;
+    function cancelOrder (uint256 _id) public {
+        OrderInfo storage order = idToCostAverageOrder[_id];
+
+        require(order.account == msg.sender);
+        require(order.sourceCurrencyBalance > 0);
+
+        uint256 refundAmount = order.sourceCurrencyBalance;
+        order.sourceCurrencyBalance = 0;
+
+        msg.sender.transfer(refundAmount);
+
+        emit CancelOrder(order.account, _id);
     }
 
     function createOrder (uint256 _amount, address _targetCurrency, uint256 _frequency, uint8 _batches) public payable returns (uint256 id_) {
@@ -98,6 +108,10 @@ contract CostAverageOrderBook is Ownable {
             order.sourceCurrencyBalance);
     }
 
+    function getOrderCountForAccount (address _account) view public returns (uint256 count_) {
+        return accountToOrderIds[_account].length;
+    }
+
     function getOrderForAccountIndex (address _account, uint256 _index) view public returns (
         uint256 id_, uint256 amount_, address targetCurrency_, uint256 frequency_, uint8 batches_,
         uint8 batchesExecuted_, uint256 lastConversionTimestamp_, uint256 targetCurrencyConverted_,
@@ -107,44 +121,12 @@ contract CostAverageOrderBook is Ownable {
         return getOrder(accountToOrderIds[_account][_index]);
     }
 
-    function getOrderCountForAccount (address _account) view public returns (uint256 count_) {
-        return accountToOrderIds[_account].length;
-    }
-
     function getOrderParamLimits() view public returns (uint256 minAmount_, uint32 minFrequency_,
         uint8 minBatches_, uint8 maxBatches_) {
         return (minAmount, minFrequency, minBatches, maxBatches);
     }
 
-    function cancelOrder (uint256 _id) public {
-        OrderInfo storage order = idToCostAverageOrder[_id];
-
-        require(order.account == msg.sender);
-        require(order.sourceCurrencyBalance > 0);
-
-        uint256 refundAmount = order.sourceCurrencyBalance;
-        order.sourceCurrencyBalance = 0;
-
-        msg.sender.transfer(refundAmount);
-
-        emit CancelOrder(order.account, _id);
-    }
-
-    function withdrawFees () public onlyOwner {
-        require (feeBalance > 0);
-
-        uint256 withdrawalAmount = feeBalance;
-        feeBalance = 0;
-        feesWithdrawn.add(withdrawalAmount);
-
-        msg.sender.transfer(withdrawalAmount);
-    }
-
-    function getTotalFeesCollected () view public returns (uint256) {
-        return feeBalance.add(feesWithdrawn);
-    }
-
-    // Convenience function
+    // Convenience function for dapp display of contract stats
     function getStatTotals () view external returns (uint256 orders_, uint256 conversions_, uint256 managedEth_, uint256 fees_) {
         orders_ = id;
 
@@ -157,6 +139,27 @@ contract CostAverageOrderBook is Ownable {
         managedEth_ = address(this).balance.sub(feeBalance);
         fees_ = getTotalFeesCollected();
     }
+
+    function getTotalFeesCollected () view public returns (uint256) {
+        return feeBalance.add(feesWithdrawn);
+    }
+
+    function setRemoteCaller (address _remoteCaller) public onlyOwner {
+        remoteCaller = _remoteCaller;
+    }
+
+    function withdrawFees () public onlyOwner {
+        require (feeBalance > 0);
+
+        uint256 withdrawalAmount = feeBalance;
+        feeBalance = 0;
+        feesWithdrawn.add(withdrawalAmount);
+
+        msg.sender.transfer(withdrawalAmount);
+    }
+
+
+    /*** Uniswap conversion logic ***/
 
     function checkConversionDue (uint256 _id) view public returns (bool) {
         OrderInfo memory order = idToCostAverageOrder[_id];
@@ -175,17 +178,6 @@ contract CostAverageOrderBook is Ownable {
         if (timeDelta < order.frequency) return false;
 
         return true;
-    }
-
-    // Remote server calls this function to execute overdue converstions
-    function executeDueConversions () external {
-        require(msg.sender == remoteCaller);
-
-        for (uint256 i=0; i<=id; i++) {
-            if (checkConversionDue(i) == true) {
-                convertCurrency(i);
-            }
-        }
     }
 
     function convertCurrency(uint256 _id) private {
@@ -222,6 +214,17 @@ contract CostAverageOrderBook is Ownable {
         uint256 min_tokens = 1; // TODO: implement this correctly, see "sell order" logic in docs
         uint256 deadline = now + 300; // this is the value in the docs; used so nodes can't hold off on unsigned txs and wait for optimal times to sell/arbitrage
         amountReceived_ = exchange.ethToTokenTransferInput.value(_amountSourceCurrency)(min_tokens, deadline, _account);
+    }
+
+    // Remote server calls this function to execute overdue converstions
+    function executeDueConversions () external {
+        require(msg.sender == remoteCaller);
+
+        for (uint256 i=0; i<=id; i++) {
+            if (checkConversionDue(i) == true) {
+                convertCurrency(i);
+            }
+        }
     }
 
     function valuePerBatch(uint256 _amount, uint8 _batches) pure internal returns (uint256) {
