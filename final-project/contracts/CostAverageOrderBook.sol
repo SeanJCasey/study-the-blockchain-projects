@@ -20,7 +20,7 @@ contract CostAverageOrderBook is Ownable {
     UniswapFactoryInterface internal factory;
 
     struct OrderInfo {
-        address owner;
+        address account;
         address targetCurrency;
         uint256 amount;
         uint256 frequency; // in seconds
@@ -31,20 +31,20 @@ contract CostAverageOrderBook is Ownable {
         uint8 batchesExecuted;
     }
     mapping(uint256 => OrderInfo) public idToCostAverageOrder;
-    mapping(address => uint256[]) public ownerToOrderIds;
+    mapping(address => uint256[]) public accountToOrderIds;
 
     event NewOrder(
-        address indexed _owner,
+        address indexed _account,
         uint256 _orderId
     );
 
     event OrderConversion(
-        address indexed _owner,
+        address indexed _account,
         uint256 _orderId
     );
 
     event CancelOrder(
-        address indexed _owner,
+        address indexed _account,
         uint256 _orderId
     );
 
@@ -70,7 +70,7 @@ contract CostAverageOrderBook is Ownable {
             targetCurrency: _targetCurrency,
             frequency: _frequency,
             batches: _batches,
-            owner: msg.sender,
+            account: msg.sender,
             sourceCurrencyBalance: _amount,
             targetCurrencyConverted: 0,
             batchesExecuted: 0,
@@ -78,7 +78,7 @@ contract CostAverageOrderBook is Ownable {
         });
 
         idToCostAverageOrder[id] = newOrder;
-        ownerToOrderIds[msg.sender].push(id);
+        accountToOrderIds[msg.sender].push(id);
 
         emit NewOrder(msg.sender, id);
 
@@ -98,15 +98,17 @@ contract CostAverageOrderBook is Ownable {
             order.sourceCurrencyBalance);
     }
 
-    function getOrderForOwnerIndex (address _owner, uint256 _index) view public returns (
+    function getOrderForAccountIndex (address _account, uint256 _index) view public returns (
         uint256 id_, uint256 amount_, address targetCurrency_, uint256 frequency_, uint8 batches_,
         uint8 batchesExecuted_, uint256 lastConversionTimestamp_, uint256 targetCurrencyConverted_,
         uint256 sourceCurrencyBalance_) {
-        return getOrder(ownerToOrderIds[_owner][_index]);
+        require(_index < getOrderCountForAccount(_account));
+
+        return getOrder(accountToOrderIds[_account][_index]);
     }
 
-    function getOrderCountForOwner (address _owner) view public returns (uint256 count_) {
-        return ownerToOrderIds[_owner].length;
+    function getOrderCountForAccount (address _account) view public returns (uint256 count_) {
+        return accountToOrderIds[_account].length;
     }
 
     function getOrderParamLimits() view public returns (uint256 minAmount_, uint32 minFrequency_,
@@ -117,7 +119,7 @@ contract CostAverageOrderBook is Ownable {
     function cancelOrder (uint256 _id) public {
         OrderInfo storage order = idToCostAverageOrder[_id];
 
-        require(order.owner == msg.sender);
+        require(order.account == msg.sender);
         require(order.sourceCurrencyBalance > 0);
 
         uint256 refundAmount = order.sourceCurrencyBalance;
@@ -125,7 +127,7 @@ contract CostAverageOrderBook is Ownable {
 
         msg.sender.transfer(refundAmount);
 
-        emit CancelOrder(order.owner, _id);
+        emit CancelOrder(order.account, _id);
     }
 
     function withdrawFees () public onlyOwner {
@@ -138,7 +140,7 @@ contract CostAverageOrderBook is Ownable {
         msg.sender.transfer(withdrawalAmount);
     }
 
-    function getTotalFeesCollected() view public returns (uint256) {
+    function getTotalFeesCollected () view public returns (uint256) {
         return feeBalance.add(feesWithdrawn);
     }
 
@@ -190,25 +192,24 @@ contract CostAverageOrderBook is Ownable {
         feeBalance += fee;
 
         // ETH converted to tokens here
-        uint256 amountReceived = exchangeCurrency(order.owner, order.targetCurrency, batchValue.sub(fee));
+        uint256 amountReceived = exchangeCurrency(order.account, order.targetCurrency, batchValue.sub(fee));
 
         // Update total tokens converted
         order.targetCurrencyConverted += amountReceived;
 
-        emit OrderConversion(order.owner, _id);
+        emit OrderConversion(order.account, _id);
     }
 
-    function exchangeCurrency(address _owner, address _targetCurrency, uint256 _amountSourceCurrency) private returns (uint256 amountReceived_) {
+    function exchangeCurrency(address _account, address _targetCurrency, uint256 _amountSourceCurrency) private returns (uint256 amountReceived_) {
         // Set up the Uniswap exchange interface by finding the token's address via the factory
         address exchangeAddress = factory.getExchange(_targetCurrency);
         UniswapExchangeInterface exchange = UniswapExchangeInterface(exchangeAddress);
 
         uint256 min_tokens = 1; // TODO: implement this correctly, see "sell order" logic in docs
         uint256 deadline = now + 300; // this is the value in the docs; used so nodes can't hold off on unsigned txs and wait for optimal times to sell/arbitrage
-        amountReceived_ = exchange.ethToTokenTransferInput.value(_amountSourceCurrency)(min_tokens, deadline, _owner);
+        amountReceived_ = exchange.ethToTokenTransferInput.value(_amountSourceCurrency)(min_tokens, deadline, _account);
     }
 
-    // TODO: deal with uneven divisibility
     function valuePerBatch(uint256 _amount, uint8 _batches) pure internal returns (uint256) {
         return _amount.div(_batches);
     }

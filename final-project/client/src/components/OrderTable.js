@@ -19,7 +19,7 @@ class OrderTable extends Component {
     const { drizzle, drizzleState } = this.props;
     const contract = drizzle.contracts.CostAverageOrderBook;
 
-    const orderCountKey = contract.methods["getOrderCountForOwner"].cacheCall(drizzleState.accounts[0]);
+    const orderCountKey = contract.methods["getOrderCountForAccount"].cacheCall(drizzleState.accounts[0]);
 
     this.setState({ orderCountKey });
   }
@@ -30,13 +30,13 @@ class OrderTable extends Component {
 
   getNewOrdersForUser() {
     const { drizzle, drizzleState } = this.props;
-    const orderCount = drizzleState.contracts.CostAverageOrderBook.getOrderCountForOwner[this.state.orderCountKey];
+    const orderCount = drizzleState.contracts.CostAverageOrderBook.getOrderCountForAccount[this.state.orderCountKey];
     const { orderKeys } = this.state;
 
     if (orderCount && orderCount.value > orderKeys.length) {
       const newOrderKeys = []
       for (let i = orderKeys.length; i < orderCount.value; i++) {
-        newOrderKeys.push(drizzle.contracts.CostAverageOrderBook.methods["getOrderForOwnerIndex"].cacheCall(drizzleState.accounts[0], i));
+        newOrderKeys.push(drizzle.contracts.CostAverageOrderBook.methods["getOrderForAccountIndex"].cacheCall(drizzleState.accounts[0], i));
       }
       this.setState({ orderKeys: [...this.state.orderKeys, ...newOrderKeys] })
     }
@@ -58,7 +58,7 @@ class OrderTable extends Component {
     let orders = [];
     let ordersFinished = [];
     for (const orderKey of orderKeys) {
-      const orderState = drizzleState.contracts.CostAverageOrderBook.getOrderForOwnerIndex[orderKey];
+      const orderState = drizzleState.contracts.CostAverageOrderBook.getOrderForAccountIndex[orderKey];
       if (orderState) {
         const order = {
           'id': orderState.value.id_,
