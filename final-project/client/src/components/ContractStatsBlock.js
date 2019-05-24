@@ -8,6 +8,7 @@ class ContractStatsBlock extends Component {
     this.state = {
       feesCollectedKey: null,
       orderIdKey: null,
+      statTotalsKey: null,
       contractBalance: 0,
     }
   }
@@ -18,19 +19,21 @@ class ContractStatsBlock extends Component {
 
     const feesCollectedKey = contract.methods["getTotalFeesCollected"].cacheCall();
     const orderIdKey = contract.methods["id"].cacheCall();
+    const statTotalsKey = contract.methods["getStatTotals"].cacheCall();
 
     drizzle.web3.eth.getBalance(contract.address)
       .then(contractBalance => {
-        this.setState({ feesCollectedKey, orderIdKey, contractBalance });
+        this.setState({ feesCollectedKey, orderIdKey, statTotalsKey, contractBalance });
       })
   }
 
   render() {
-    const { feesCollectedKey, orderIdKey, contractBalance } = this.state;
+    const { feesCollectedKey, orderIdKey, statTotalsKey, contractBalance } = this.state;
     const { drizzle, drizzleState } = this.props;
 
     const feesCollected = drizzleState.contracts.CostAverageOrderBook.getTotalFeesCollected[feesCollectedKey];
     const nextOrderId = drizzleState.contracts.CostAverageOrderBook.id[orderIdKey];
+    const statTotals = drizzleState.contracts.CostAverageOrderBook.getStatTotals[statTotalsKey];
 
     return (
       <div className="contractStatsBlock">
@@ -39,7 +42,7 @@ class ContractStatsBlock extends Component {
           Orders created: {nextOrderId && nextOrderId.value}
         </div>
         <div className="conversions">
-          Trades executed:
+          Trades executed: {statTotals && statTotals.value}
         </div>
         <div className="balance">
           ETH under management: {parseFloat(drizzle.web3.utils.fromWei(contractBalance.toString(), 'ether')).toFixed(4)} ETH
