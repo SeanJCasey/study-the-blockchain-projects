@@ -25,6 +25,9 @@ const mnemonic = fs.readFileSync('.secret').toString().trim();
 const path = require('path');
 
 module.exports = {
+
+  plugins: ["truffle-security"],
+
   // Need to do this to get contracts inside the create-react-app folder
   contracts_build_directory: path.join(__dirname, 'client/src/contracts'),
   /**
