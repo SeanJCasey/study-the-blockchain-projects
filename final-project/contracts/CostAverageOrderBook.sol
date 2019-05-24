@@ -8,7 +8,7 @@ import './UniswapExchangeInterface.sol';
 contract CostAverageOrderBook is Ownable {
     using SafeMath for uint256;
 
-    uint256 public id;
+    uint256 public nextId;
     address private remoteCaller;
     uint256 private feeBalance;
     uint256 private feesWithdrawn;
@@ -51,6 +51,7 @@ contract CostAverageOrderBook is Ownable {
     constructor (address _uniswapFactoryAddress) public payable { // I think we need payable to instantiate the contract with ETH
         factory = UniswapFactoryInterface(_uniswapFactoryAddress);
         remoteCaller = msg.sender; // TODO: CHANGE TO SERVER'S WALLET
+        nextId = 1; // Set first order as 1 instead of 0
     }
 
     function cancelOrder (uint256 _id) public {
@@ -87,14 +88,14 @@ contract CostAverageOrderBook is Ownable {
             lastConversionTimestamp: 0
         });
 
-        idToCostAverageOrder[id] = newOrder;
-        accountToOrderIds[msg.sender].push(id);
+        idToCostAverageOrder[nextId] = newOrder;
+        accountToOrderIds[msg.sender].push(nextId);
 
-        emit NewOrder(msg.sender, id);
+        emit NewOrder(msg.sender, nextId);
 
-        id++;
+        nextId++;
 
-        return id-1;
+        return nextId-1;
     }
 
     function getOrder (uint256 _id) view public returns (
@@ -106,6 +107,10 @@ contract CostAverageOrderBook is Ownable {
         return (_id, order.amount, order.targetCurrency, order.frequency, order.batches,
             order.batchesExecuted, order.lastConversionTimestamp, order.targetCurrencyConverted,
             order.sourceCurrencyBalance);
+    }
+
+    function getOrderCount () view public returns (uint256) {
+        return nextId-1;
     }
 
     function getOrderCountForAccount (address _account) view public returns (uint256 count_) {
@@ -128,10 +133,10 @@ contract CostAverageOrderBook is Ownable {
 
     // Convenience function for dapp display of contract stats
     function getStatTotals () view external returns (uint256 orders_, uint256 conversions_, uint256 managedEth_, uint256 fees_) {
-        orders_ = id;
+        orders_ = getOrderCount();
 
         conversions_ = 0;
-        for (uint256 i=0; i<=id; i++) {
+        for (uint256 i=1; i<=getOrderCount(); i++) {
             OrderInfo memory order = idToCostAverageOrder[i];
             conversions_ += order.batchesExecuted;
         }
@@ -220,7 +225,7 @@ contract CostAverageOrderBook is Ownable {
     function executeDueConversions () external {
         require(msg.sender == remoteCaller);
 
-        for (uint256 i=0; i<=id; i++) {
+        for (uint256 i=1; i<=getOrderCount(); i++) {
             if (checkConversionDue(i) == true) {
                 convertCurrency(i);
             }
