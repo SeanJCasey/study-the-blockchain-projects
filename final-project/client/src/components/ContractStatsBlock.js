@@ -17,38 +17,37 @@ class ContractStatsBlock extends Component {
     const { drizzle } = this.props;
     const contract = drizzle.contracts.CostAverageOrderBook;
 
-    const feesCollectedKey = contract.methods["getTotalFeesCollected"].cacheCall();
-    const orderIdKey = contract.methods["id"].cacheCall();
+    // const feesCollectedKey = contract.methods["getTotalFeesCollected"].cacheCall();
+    // const orderIdKey = contract.methods["id"].cacheCall();
     const statTotalsKey = contract.methods["getStatTotals"].cacheCall();
 
-    drizzle.web3.eth.getBalance(contract.address)
-      .then(contractBalance => {
-        this.setState({ feesCollectedKey, orderIdKey, statTotalsKey, contractBalance });
-      })
+    // drizzle.web3.eth.getBalance(contract.address)
+    //   .then(contractBalance => {
+    //     this.setState({ feesCollectedKey, orderIdKey, statTotalsKey, contractBalance });
+    //   })
+    this.setState({ statTotalsKey });
   }
 
   render() {
-    const { feesCollectedKey, orderIdKey, statTotalsKey, contractBalance } = this.state;
+    const { statTotalsKey } = this.state;
     const { drizzle, drizzleState } = this.props;
 
-    const feesCollected = drizzleState.contracts.CostAverageOrderBook.getTotalFeesCollected[feesCollectedKey];
-    const nextOrderId = drizzleState.contracts.CostAverageOrderBook.id[orderIdKey];
     const statTotals = drizzleState.contracts.CostAverageOrderBook.getStatTotals[statTotalsKey];
 
     return (
       <div className="contractStatsBlock">
         <strong>Vulcanizer totals</strong>
         <div className="orders">
-          Orders created: {nextOrderId && nextOrderId.value}
+          Orders created: {statTotals && statTotals.value.orders_}
         </div>
         <div className="conversions">
-          Trades executed: {statTotals && statTotals.value}
+          Trades executed: {statTotals && statTotals.value.conversions_}
         </div>
         <div className="balance">
-          ETH under management: {parseFloat(drizzle.web3.utils.fromWei(contractBalance.toString(), 'ether')).toFixed(4)} ETH
+          ETH under management: {statTotals && parseFloat(drizzle.web3.utils.fromWei(statTotals.value.managedEth_, 'ether')).toFixed(4)} ETH
         </div>
         <div className="fees">
-          Fees collected: {feesCollected && parseFloat(drizzle.web3.utils.fromWei(feesCollected.value, 'ether')).toFixed(4)} ETH
+          Fees collected: {statTotals && parseFloat(drizzle.web3.utils.fromWei(statTotals.value.fees_, 'ether')).toFixed(4)} ETH
         </div>
       </div>
     );

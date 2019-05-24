@@ -144,14 +144,18 @@ contract CostAverageOrderBook is Ownable {
         return feeBalance.add(feesWithdrawn);
     }
 
-    // Remote server calls this function to execute overdue converstions
-    function getStatTotals () view external returns (uint256 conversions_) {
-        conversions_ = 0;
+    // Convenience function
+    function getStatTotals () view external returns (uint256 orders_, uint256 conversions_, uint256 managedEth_, uint256 fees_) {
+        orders_ = id;
 
+        conversions_ = 0;
         for (uint256 i=0; i<=id; i++) {
             OrderInfo memory order = idToCostAverageOrder[i];
             conversions_ += order.batchesExecuted;
         }
+
+        managedEth_ = address(this).balance.sub(feeBalance);
+        fees_ = getTotalFeesCollected();
     }
 
     function checkConversionDue (uint256 _id) view public returns (bool) {
