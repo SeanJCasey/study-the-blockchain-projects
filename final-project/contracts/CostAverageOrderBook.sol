@@ -110,6 +110,10 @@ contract CostAverageOrderBook is Ownable {
         return nextId-1;
     }
 
+    function getFeeBalance () view public onlyOwner returns (uint256 feeBalance_) {
+        feeBalance_ = feeBalance;
+    }
+
     function getOrder (uint256 _id) view public returns (
         uint256 id_, uint256 amount_, address targetCurrency_, uint256 frequency_, uint8 batches_,
         uint8 batchesExecuted_, uint256 lastConversionTimestamp_, uint256 targetCurrencyConverted_,
