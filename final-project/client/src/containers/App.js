@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { DrizzleContext } from "drizzle-react";
+import { BrowserRouter as Router, Route } from "react-router-dom";
 
-import StatsContainer from './StatsContainer';
-import OrderBuilderContainer from './OrderBuilderContainer';
-import OrderTableContainer from './OrderTableContainer';
+import Navbar from '../components/Navbar';
+import CostAverageOrderBookPage from './CostAverageOrderBookPage';
 
 class App extends Component {
 
@@ -18,14 +18,25 @@ class App extends Component {
           }
 
           return (
-            <div className="App">
-              <div className="container">
-                <h1>Vulcanizer</h1>
-                <StatsContainer />
-                <OrderBuilderContainer drizzle={drizzle} drizzleState={drizzleState} />
-                <OrderTableContainer />
+            <Router>
+              <div className="App">
+                <Navbar
+                  drizzle={drizzle}
+                  drizzleState={drizzleState}
+                />
+
+                <Route
+                  path='/'
+                  exact
+                  render={(props) =>
+                    <CostAverageOrderBookPage
+                      {...props}
+                      drizzle={drizzle}
+                      drizzleState={drizzleState}
+                    />}
+                />
               </div>
-            </div>
+            </Router>
           );
         }}
       </DrizzleContext.Consumer>
