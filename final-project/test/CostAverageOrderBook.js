@@ -11,21 +11,21 @@ contract('CostAverageOrderBook', accounts => {
     const constructorAmount = web3.utils.toWei('0.1');
 
     // Order 1
-    const orderId1 = 0;
+    const orderId1 = 1;
     const contribAmount1 = web3.utils.toWei('5'); // using wei amount results in big num error
     const targetCurrency1 = '0xBd4Ac9375F7cfA025b9BA06A202c7abF24973c40';
     const frequency1 = 3600; // 1 hr
     const batches1 = 3;
 
     // Order 2
-    const orderId2 = 1;
+    const orderId2 = 2;
     const contribAmount2 = web3.utils.toWei('0.5'); // using wei amount results in big num error
     const targetCurrency2 = '0xBd4Ac9375F7cfA025b9BA06A202c7abF24973c40';
     const frequency2 = 86400; // 1 day
     const batches2 = 10;
 
     // Order 3
-    const orderId3 = 2;
+    const orderId3 = 3;
     const contribAmount3 = web3.utils.toWei('12.5786'); // using wei amount results in big num error
     const targetCurrency3 = '0xBd4Ac9375F7cfA025b9BA06A202c7abF24973c40';
     const frequency3 = 2592000; // 1 month
@@ -71,21 +71,21 @@ contract('CostAverageOrderBook', accounts => {
         });
 
         it('can get order count for an address', async () => {
-            const orderCount = await this.contract.getOrderCountForOwner(user1);
+            const orderCount = await this.contract.getOrderCountForAccount(user1);
 
             assert.equal(orderCount, 2)
         });
 
         it('can get all orders for an address', async () => {
-            const orderCount = await this.contract.getOrderCountForOwner(user1);
+            const orderCount = await this.contract.getOrderCountForAccount(user1);
 
             const orders = []
             for (let i = 0; i < orderCount; i++) {
-                const order = await this.contract.getOrderForOwnerIndex(user1, i);
+                const order = await this.contract.getOrderForAccountIndex(user1, i);
                 orders.push(order);
             }
 
-            // User 1 should be the owner of orders 1 and 3
+            // User 1 should be the account of orders 1 and 3
             assert.equal(orders[0].id_, orderId1);
             assert.equal(orders[1].id_, orderId3);
         });
