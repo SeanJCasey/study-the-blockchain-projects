@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { DrizzleContext } from "drizzle-react";
 
 import { TOKENTABLE } from '../constants';
 import UniswapExchangeInterface from "../contracts/UniswapExchangeInterface.json";
@@ -28,7 +29,8 @@ class TokenLiquidityBlock extends Component {
   }
 
   updateExchange() {
-    const { drizzle, targetTokenAddress } = this.props;
+    const { drizzle } = this.context;
+    const { targetTokenAddress } = this.props;
 
     const factory = drizzle.contracts.UniswapFactoryInterface;
     factory.methods.getExchange(targetTokenAddress).call()
@@ -80,5 +82,7 @@ class TokenLiquidityBlock extends Component {
     );
   }
 }
+
+TokenLiquidityBlock.contextType = DrizzleContext.Context;
 
 export default TokenLiquidityBlock;

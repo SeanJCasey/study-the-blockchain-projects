@@ -5,25 +5,16 @@ import OrderTable from "../components/OrderTable";
 
 class OrderTableContainer extends Component {
   render() {
+    const { drizzle, drizzleState } = this.context;
+
     return (
-      <DrizzleContext.Consumer>
-        {drizzleContext => {
-          const { drizzle, drizzleState, initialized } = drizzleContext;
-
-          if (!initialized) {
-            return "Loading...";
-          }
-
-          return (
-            <div className="orderTableContainer">
-              <OrderTable drizzle={drizzle} drizzleState={drizzleState} />
-            </div>
-          );
-        }}
-      </DrizzleContext.Consumer>
-
+      <div className="orderTableContainer">
+        <OrderTable drizzle={drizzle} drizzleState={drizzleState} />
+      </div>
     );
   }
 }
+
+OrderTableContainer.contextType = DrizzleContext.Context;
 
 export default OrderTableContainer;

@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { DrizzleContext } from "drizzle-react";
 
 class OrderConversionActions extends Component {
 
@@ -9,8 +10,8 @@ class OrderConversionActions extends Component {
   }
 
   handleCoversionQueueClick() {
-    // run conversion due function
-    const contract = this.props.drizzle.contracts.CostAverageOrderBook;
+    const { drizzle } = this.context;
+    const contract = drizzle.contracts.CostAverageOrderBook;
 
     contract.methods.executeDueConversions().send()
       .then(res => console.log(res))
@@ -25,5 +26,7 @@ class OrderConversionActions extends Component {
     );
   }
 }
+
+OrderConversionActions.contextType = DrizzleContext.Context;
 
 export default OrderConversionActions;

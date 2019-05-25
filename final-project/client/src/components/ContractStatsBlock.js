@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { DrizzleContext } from "drizzle-react";
 
 class ContractStatsBlock extends Component {
 
@@ -14,7 +15,7 @@ class ContractStatsBlock extends Component {
   }
 
   componentDidMount() {
-    const { drizzle } = this.props;
+    const { drizzle } = this.context;
     const contract = drizzle.contracts.CostAverageOrderBook;
 
     // const feesCollectedKey = contract.methods["getTotalFeesCollected"].cacheCall();
@@ -30,7 +31,7 @@ class ContractStatsBlock extends Component {
 
   render() {
     const { statTotalsKey } = this.state;
-    const { drizzle, drizzleState } = this.props;
+    const { drizzle, drizzleState } = this.context;
 
     const statTotals = drizzleState.contracts.CostAverageOrderBook.getStatTotals[statTotalsKey];
 
@@ -53,5 +54,7 @@ class ContractStatsBlock extends Component {
     );
   }
 }
+
+ContractStatsBlock.contextType = DrizzleContext.Context;
 
 export default ContractStatsBlock;

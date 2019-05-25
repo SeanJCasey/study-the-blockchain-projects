@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { DrizzleContext } from "drizzle-react";
 
 import { TOKENTABLE, TIMETABLE } from '../constants';
 import { dateObjDisplayFormatter } from '../utils';
@@ -16,7 +17,7 @@ class OrderTable extends Component {
   }
 
   componentDidMount() {
-    const { drizzle, drizzleState } = this.props;
+    const { drizzle, drizzleState } = this.context;
     const contract = drizzle.contracts.CostAverageOrderBook;
 
     const orderCountKey = contract.methods["getOrderCountForAccount"].cacheCall(drizzleState.accounts[0]);
@@ -29,7 +30,7 @@ class OrderTable extends Component {
   }
 
   getNewOrdersForUser() {
-    const { drizzle, drizzleState } = this.props;
+    const { drizzle, drizzleState } = this.context;
     const orderCount = drizzleState.contracts.CostAverageOrderBook.getOrderCountForAccount[this.state.orderCountKey];
     const { orderKeys } = this.state;
 
@@ -43,8 +44,9 @@ class OrderTable extends Component {
   }
 
   handleCancelOrderClick(event) {
+    const { drizzle } = this.context;
     const orderId = event.target.value;
-    const contract = this.props.drizzle.contracts.CostAverageOrderBook;
+    const contract = drizzle.contracts.CostAverageOrderBook;
 
     contract.methods.cancelOrder(orderId).send()
       .then(res => console.log(res))
@@ -52,7 +54,7 @@ class OrderTable extends Component {
   }
 
   render() {
-    const { drizzle, drizzleState } = this.props;
+    const { drizzle, drizzleState } = this.context;;
     const { orderKeys } = this.state;
 
     let orders = [];
@@ -167,5 +169,7 @@ class OrderTable extends Component {
     );
   }
 }
+
+OrderTable.contextType = DrizzleContext.Context;
 
 export default OrderTable;

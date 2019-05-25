@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { DrizzleContext } from "drizzle-react";
 
 import OrderForm from "../components/OrderForm";
 import TokenLiquidityBlock from "../components/TokenLiquidityBlock";
@@ -26,7 +27,7 @@ class OrderBuilderContainer extends Component {
   }
 
   componentDidMount() {
-    const { drizzle } = this.props;
+    const { drizzle } = this.context;
     const contract = drizzle.contracts.CostAverageOrderBook;
     const orderParamLimitsKey = contract.methods["getOrderParamLimits"].cacheCall();
 
@@ -34,7 +35,7 @@ class OrderBuilderContainer extends Component {
   }
 
   createOrder() {
-    const { drizzle, drizzleState } = this.props;
+    const { drizzle, drizzleState } = this.context;
     const contract = drizzle.contracts.CostAverageOrderBook;
 
     const amount = drizzle.web3.utils.toWei(String(this.state.newOrderInputs.quantity), 'ether');
@@ -52,7 +53,7 @@ class OrderBuilderContainer extends Component {
 
   handleFormValidation() {
     const { orderParamLimitsKey } = this.state;
-    const { drizzle, drizzleState } = this.props;
+    const { drizzle, drizzleState } = this.context;
     const orderParamLimits = drizzleState.contracts.CostAverageOrderBook.getOrderParamLimits[orderParamLimitsKey];
 
     const formErrors = {};
@@ -102,8 +103,6 @@ class OrderBuilderContainer extends Component {
           </div>
           <div className="col-sm-4">
             <TokenLiquidityBlock
-              drizzle={this.props.drizzle}
-              drizzleState={this.props.drizzleState}
               targetTokenAddress={this.state.newOrderInputs.tokenAddress}
             />
           </div>
@@ -112,5 +111,7 @@ class OrderBuilderContainer extends Component {
     );
   }
 }
+
+OrderBuilderContainer.contextType = DrizzleContext.Context;
 
 export default OrderBuilderContainer;

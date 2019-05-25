@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { DrizzleContext } from "drizzle-react";
 
 class AccountStatsBlock extends Component {
 
@@ -14,7 +15,7 @@ class AccountStatsBlock extends Component {
   }
 
   componentDidMount() {
-    const { drizzle, drizzleState } = this.props;
+    const { drizzle, drizzleState } = this.context;
     const account = drizzleState.accounts[0];
 
     drizzle.web3.eth.getBalance(account)
@@ -33,7 +34,7 @@ class AccountStatsBlock extends Component {
   }
 
   componentDidUpdate() {
-    const { drizzle, drizzleState } = this.props;
+    const { drizzle, drizzleState } = this.context;
 
     drizzle.web3.eth.getBalance(drizzleState.accounts[0])
       .then(ethBalance => {
@@ -43,7 +44,7 @@ class AccountStatsBlock extends Component {
 
   render() {
     const { ethBalance, seanTokenBalanceKey, moonTokenBalanceKey, consensysTokenBalanceKey } = this.state;
-    const { drizzle, drizzleState } = this.props;
+    const { drizzle, drizzleState } = this.context;
 
     const seanTokenBalance = drizzleState.contracts.SeanToken.balanceOf[seanTokenBalanceKey];
     const moonTokenBalance = drizzleState.contracts.MoonToken.balanceOf[moonTokenBalanceKey];
@@ -71,5 +72,7 @@ class AccountStatsBlock extends Component {
     );
   }
 }
+
+AccountStatsBlock.contextType = DrizzleContext.Context;
 
 export default AccountStatsBlock;

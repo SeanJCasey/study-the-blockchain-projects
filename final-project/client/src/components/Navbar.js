@@ -10,7 +10,7 @@ class Navbar extends Component {
           <div className="admin-links">
             <div className="account-info">
               <Link
-                to={'/'}
+                to={'/admin'}
               >
               Admin
               </Link>
