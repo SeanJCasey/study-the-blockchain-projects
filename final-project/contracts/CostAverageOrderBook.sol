@@ -12,10 +12,10 @@ contract CostAverageOrderBook is Ownable {
     address private remoteCaller;
     uint256 private feeBalance;
     uint256 private feesWithdrawn;
-    uint256 public minAmount = 0.1 ether;
-    uint32 public minFrequency = 3600;
-    uint8 public minBatches = 1;
-    uint8 public maxBatches = 255;
+    uint256 public minAmount;
+    uint32 public minFrequency;
+    uint8 public minBatches;
+    uint8 public maxBatches;
 
     UniswapFactoryInterface internal factory;
 
@@ -57,6 +57,12 @@ contract CostAverageOrderBook is Ownable {
         factory = UniswapFactoryInterface(_uniswapFactoryAddress);
         remoteCaller = msg.sender; // TODO: CHANGE TO SERVER'S WALLET
         nextId = 1; // Set first order as 1 instead of 0
+
+        // Initial order min/max
+        maxBatches = 255;
+        minAmount = 0.1 ether;
+        minBatches = 1;
+        minFrequency = 1 hours;
     }
 
     function cancelOrder (uint256 _id) public {
@@ -76,10 +82,11 @@ contract CostAverageOrderBook is Ownable {
     function createOrder (uint256 _amount, address _targetCurrency, uint256 _frequency, uint8 _batches) public payable returns (uint256 id_) {
         require(_amount == msg.value); // Can't use this if they send DAI
 
-        // Enforce minimums for params
-        require(_frequency >= minFrequency);
-        require(_batches >= minBatches);
+        // Enforce min/max for params
         require(_amount >= minAmount);
+        require(_batches >= minBatches);
+        require(_frequency >= minFrequency);
+        require(_batches <= maxBatches);
 
         OrderInfo memory newOrder = OrderInfo({
             amount: _amount,
@@ -152,6 +159,22 @@ contract CostAverageOrderBook is Ownable {
 
     function getTotalFeesCollected () view public returns (uint256) {
         return feeBalance.add(feesWithdrawn);
+    }
+
+    function setMaxBatches (uint8 _maxBatches) public onlyOwner {
+        maxBatches = _maxBatches;
+    }
+
+    function setMinAmount (uint256 _minAmount) public onlyOwner {
+        minAmount = _minAmount;
+    }
+
+    function setMinBatches (uint8 _minBatches) public onlyOwner {
+        minBatches = _minBatches;
+    }
+
+    function setMinFrequency (uint32 _minFrequency) public onlyOwner {
+        minFrequency = _minFrequency;
     }
 
     function setRemoteCaller (address _remoteCaller) public onlyOwner {
