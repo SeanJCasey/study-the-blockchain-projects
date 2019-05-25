@@ -48,6 +48,11 @@ contract CostAverageOrderBook is Ownable {
         uint256 _orderId
     );
 
+    modifier onlyRemoteCaller() {
+        require(msg.sender == remoteCaller);
+        _;
+    }
+
     constructor (address _uniswapFactoryAddress) public payable { // I think we need payable to instantiate the contract with ETH
         factory = UniswapFactoryInterface(_uniswapFactoryAddress);
         remoteCaller = msg.sender; // TODO: CHANGE TO SERVER'S WALLET
@@ -185,9 +190,7 @@ contract CostAverageOrderBook is Ownable {
         return true;
     }
 
-    function checkConversionDueAll() view public returns (uint256[] memory) {
-        require(msg.sender == remoteCaller);
-
+    function checkConversionDueAll() view external onlyRemoteCaller returns (uint256[] memory) {
         uint256 totalOrderCount = getOrderCount();
         require(totalOrderCount > 0);
 
@@ -200,9 +203,7 @@ contract CostAverageOrderBook is Ownable {
         return coversionDueMap;
     }
 
-    function checkConversionDueBatch(uint256 _idStart, uint16 _count) view public returns (uint256[] memory) {
-        require(msg.sender == remoteCaller);
-
+    function checkConversionDueBatch(uint256 _idStart, uint16 _count) view external onlyRemoteCaller returns (uint256[] memory) {
         uint256 totalOrderCount = getOrderCount();
         require(_idStart > 0);
         require(_idStart <= totalOrderCount);
@@ -252,23 +253,17 @@ contract CostAverageOrderBook is Ownable {
         amountReceived_ = exchange.ethToTokenTransferInput.value(_amountSourceCurrency)(min_tokens, deadline, _account);
     }
 
-    // Remote server calls to execute converstions 1-by-1
-    function executeDueConversion (uint256 _id) public {
-        require(msg.sender == remoteCaller);
-
+    // Execute converstions 1-by-1
+    function executeDueConversion (uint256 _id) public onlyRemoteCaller {
         if (checkConversionDue(_id) == true) {
             convertCurrency(_id);
         }
     }
 
-    // Remote server calls to execute conversions en masse
-    function executeDueConversions () external {
-        require(msg.sender == remoteCaller);
-
+    // Execute conversions en masse
+    function executeDueConversions () external onlyRemoteCaller {
         for (uint256 i=1; i<=getOrderCount(); i++) {
-            if (checkConversionDue(i) == true) {
-                convertCurrency(i);
-            }
+            executeDueConversion(i);
         }
     }
 
